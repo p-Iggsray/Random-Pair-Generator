@@ -161,12 +161,33 @@ function generatePairs() {
   render();
 }
 
-// Clears pairs only. Every player stays in their list and becomes editable again.
+// Two-tap reset. First tap arms the button (red styling + "Tap again to confirm").
+// A second tap within 3s clears pairings and team names. Players stay in their lists.
+let resetArmTimer = null;
+
+function disarmReset() {
+  const btn = document.getElementById('btn-back');
+  if (!btn) return;
+  btn.classList.remove('armed');
+  btn.textContent = 'Reset Teams';
+  clearTimeout(resetArmTimer);
+  resetArmTimer = null;
+}
+
 function resetTeams() {
-  state.pairs     = [];
-  state.hasPaired = false;
-  saveState();
-  render();
+  const btn = document.getElementById('btn-back');
+  if (btn.classList.contains('armed')) {
+    disarmReset();
+    state.pairs     = [];
+    state.hasPaired = false;
+    saveState();
+    render();
+    return;
+  }
+  btn.classList.add('armed');
+  btn.textContent = 'Tap again to confirm';
+  clearTimeout(resetArmTimer);
+  resetArmTimer = setTimeout(disarmReset, 3000);
 }
 
 // ---- render ----

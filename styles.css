@@ -454,9 +454,18 @@ input[type="text"]::placeholder { color: var(--muted); }
   letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
+  transition: background-color 0.18s, border-color 0.18s, color 0.18s;
 }
 
 .btn-back:active { background: var(--surface); }
+
+.btn-back.armed {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.55);
+  color: #ef4444;
+}
+
+.btn-back.armed:active { background: rgba(239, 68, 68, 0.22); }
 
 .btn-pair-unpaired {
   width: 100%;
