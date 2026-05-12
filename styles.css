@@ -292,6 +292,34 @@ input[type="text"]::placeholder { color: var(--muted); }
   min-width: 0;
 }
 
+.team-name-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed var(--border);
+  border-radius: 0;
+  padding: 0 0 5px 0;
+  margin-bottom: 6px;
+  color: var(--text);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px; /* prevents iOS auto-zoom on focus */
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.team-name-input::placeholder {
+  color: var(--dim);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0.04em;
+}
+
+.team-name-input:focus { border-bottom-color: var(--text); border-bottom-style: solid; }
+
 .team-member {
   display: flex;
   align-items: center;
