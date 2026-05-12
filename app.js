@@ -1,7 +1,21 @@
-// Master list model.
-// state.exp and state.inexp always hold every player ever added.
-// state.pairs references players by id only.
-// Unpaired players = those whose id does not appear in any pair.
+// Register a network-first service worker so the home-screen PWA
+// picks up new deploys automatically instead of running cached files.
+if ('serviceWorker' in navigator) {
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register('./service-worker.js').then(reg => {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') reg.update().catch(() => {});
+    });
+  }).catch(() => {});
+
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || reloaded) return;
+    reloaded = true;
+    location.reload();
+  });
+}
+
 const state = {
   exp:       [],
   inexp:     [],
