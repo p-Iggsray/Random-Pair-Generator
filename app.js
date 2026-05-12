@@ -140,6 +140,16 @@ function setTeamName(idx, value) {
   saveState();
 }
 
+function renamePlayer(type, id, value) {
+  const player = state[type].find(p => p.id === id);
+  if (!player) return;
+  const name = value.trim();
+  if (!name) { render(); return; }
+  if (name === player.name) return;
+  player.name = name;
+  saveState();
+}
+
 function generatePairs() {
   if (!state.exp.length || !state.inexp.length || state.hasPaired) return;
   const sExp   = shuffle(state.exp);
@@ -181,10 +191,13 @@ function renderPanel(type) {
 
   list.innerHTML = players.map(p => `
     <div class="name-tag">
-      <span>${esc(p.name)}</span>
       ${!state.hasPaired
-        ? `<button class="btn-remove" onclick="removePlayer('${type}', ${p.id})">×</button>`
-        : ''}
+        ? `<input class="name-edit" type="text" maxlength="40" value="${esc(p.name)}"
+                  autocomplete="off" autocorrect="off" spellcheck="false"
+                  onchange="renamePlayer('${type}', ${p.id}, this.value)"
+                  onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">
+           <button class="btn-remove" onclick="removePlayer('${type}', ${p.id})">×</button>`
+        : `<span>${esc(p.name)}</span>`}
     </div>
   `).join('');
 }
