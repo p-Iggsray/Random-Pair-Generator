@@ -114,6 +114,15 @@ function removePlayer(type, id) {
   render();
 }
 
+function setTeamName(idx, value) {
+  const pair = state.pairs[idx];
+  if (!pair) return;
+  const name = value.trim();
+  if (name) pair.name = name;
+  else delete pair.name;
+  saveState();
+}
+
 function generatePairs() {
   if (!state.exp.length || !state.inexp.length || state.hasPaired) return;
   const sExp   = shuffle(state.exp);
@@ -191,10 +200,22 @@ function renderResults() {
         const e = expById[pair.expId];
         const n = inexpById[pair.inexpId];
         if (!e || !n) return '';
+        const num  = String(i + 1).padStart(2, '0');
+        const nm   = pair.name ? esc(pair.name) : '';
         return `
           <div class="team-card">
-            <span class="team-num">${String(i + 1).padStart(2, '0')}</span>
+            <span class="team-num">${num}</span>
             <div class="team-body">
+              <input
+                class="team-name-input"
+                type="text"
+                maxlength="40"
+                placeholder="Team ${num} (tap to name)"
+                value="${nm}"
+                autocomplete="off"
+                autocorrect="off"
+                spellcheck="false"
+                onchange="setTeamName(${i}, this.value)">
               <div class="team-member">
                 <span class="member-dot exp"></span>
                 <span class="member-name exp">${esc(e.name)}</span>
@@ -246,7 +267,7 @@ function buildExportText() {
   state.pairs.forEach(pair => {
     const e = expById[pair.expId];
     const n = inexpById[pair.inexpId];
-    if (e && n) lines.push(`${e.name} & ${n.name}`);
+    if (e && n) lines.push(pair.name || `${e.name} & ${n.name}`);
   });
 
   const uExp   = unpairedExp();
