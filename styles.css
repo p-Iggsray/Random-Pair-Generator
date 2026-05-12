@@ -17,47 +17,48 @@ body {
   font-family: 'Barlow Condensed', sans-serif;
   min-height: 100vh;
   min-height: 100dvh;
+  overflow-x: hidden;
   padding:
-    calc(env(safe-area-inset-top) + 18px)
-    calc(env(safe-area-inset-right) + 18px)
-    calc(env(safe-area-inset-bottom) + 28px)
-    calc(env(safe-area-inset-left) + 18px);
+    calc(env(safe-area-inset-top) + 14px)
+    calc(env(safe-area-inset-right) + 16px)
+    calc(env(safe-area-inset-bottom) + 24px)
+    calc(env(safe-area-inset-left) + 16px);
 }
 
 header {
   text-align: center;
-  margin-bottom: 22px;
-  padding-bottom: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--border);
 }
 
 header h1 {
-  font-size: 2rem;
+  font-size: 1.7rem;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 header p {
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   color: var(--dim);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  margin-top: 4px;
+  margin-top: 3px;
 }
 
 .panels {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .panel {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 14px 12px;
+  padding: 12px 14px;
 }
 
 .panel-header {
@@ -65,13 +66,13 @@ header p {
   align-items: baseline;
   justify-content: space-between;
   gap: 6px;
-  margin-bottom: 12px;
-  padding-bottom: 10px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
   border-bottom: 1px solid var(--border);
 }
 
 .panel-label {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -133,8 +134,8 @@ input[type="text"]::placeholder { color: var(--muted); }
 .name-list {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  max-height: 220px;
+  gap: 4px;
+  max-height: 168px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -192,13 +193,13 @@ input[type="text"]::placeholder { color: var(--muted); }
 
 .btn-generate {
   width: 100%;
-  padding: 18px;
+  padding: 16px;
   background: var(--surface);
   color: var(--dim);
   border: 1px solid var(--border);
   border-radius: 10px;
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
