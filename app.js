@@ -21,11 +21,12 @@ if (navigator.storage && navigator.storage.persist) {
 }
 
 const state = {
-  exp:       [],
-  inexp:     [],
-  pairs:     [],   // [{ expId, inexpId }]
-  hasPaired: false,
-  uid:       0
+  exp:        [],
+  inexp:      [],
+  fixedPairs: [],  // [{ id, aName, bName, name? }] — set teams entered by hand
+  pairs:      [],  // [{ expId, inexpId, name? }] — random pairs from Generate
+  hasPaired:  false,
+  uid:        0
 };
 
 // ---- persistence ----
@@ -51,6 +52,7 @@ async function loadState() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) Object.assign(state, JSON.parse(raw));
   } catch(e) {}
+  if (!Array.isArray(state.fixedPairs)) state.fixedPairs = [];
 }
 
 function savePresets() {
@@ -136,6 +138,48 @@ function removePlayer(type, id) {
   render();
 }
 
+function addFixedPair() {
+  const aInput = document.getElementById('fp-a');
+  const bInput = document.getElementById('fp-b');
+  const a = aInput.value.trim();
+  const b = bInput.value.trim();
+  if (!a && !b) return;
+  if (!a) { aInput.focus(); return; }
+  if (!b) { bInput.focus(); return; }
+  state.fixedPairs.push({ id: nextId(), aName: a, bName: b });
+  aInput.value = '';
+  bInput.value = '';
+  aInput.focus();
+  saveState();
+  render();
+}
+
+function removeFixedPair(id) {
+  state.fixedPairs = state.fixedPairs.filter(fp => fp.id !== id);
+  saveState();
+  render();
+}
+
+function renameFixedPairPlayer(id, slot, value) {
+  const fp = state.fixedPairs.find(f => f.id === id);
+  if (!fp) return;
+  const name = value.trim();
+  const key  = slot === 'a' ? 'aName' : 'bName';
+  if (!name) { render(); return; }
+  if (name === fp[key]) return;
+  fp[key] = name;
+  saveState();
+}
+
+function setFixedTeamName(id, value) {
+  const fp = state.fixedPairs.find(f => f.id === id);
+  if (!fp) return;
+  const name = value.trim();
+  if (name) fp.name = name;
+  else delete fp.name;
+  saveState();
+}
+
 function setTeamName(idx, value) {
   const pair = state.pairs[idx];
   if (!pair) return;
@@ -191,11 +235,18 @@ function selectForSwap(type, pairIdx, playerId) {
 }
 
 function generatePairs() {
-  if (!state.exp.length || !state.inexp.length || state.hasPaired) return;
-  const sExp   = shuffle(state.exp);
-  const sInexp = shuffle(state.inexp);
-  const count  = Math.min(sExp.length, sInexp.length);
-  state.pairs     = Array.from({ length: count }, (_, i) => ({ expId: sExp[i].id, inexpId: sInexp[i].id }));
+  if (state.hasPaired) return;
+  const hasFixed  = state.fixedPairs.length > 0;
+  const hasRandom = state.exp.length > 0 && state.inexp.length > 0;
+  if (!hasFixed && !hasRandom) return;
+  if (hasRandom) {
+    const sExp   = shuffle(state.exp);
+    const sInexp = shuffle(state.inexp);
+    const count  = Math.min(sExp.length, sInexp.length);
+    state.pairs  = Array.from({ length: count }, (_, i) => ({ expId: sExp[i].id, inexpId: sInexp[i].id }));
+  } else {
+    state.pairs  = [];
+  }
   state.hasPaired = true;
   saveState();
   render();
@@ -237,8 +288,32 @@ function render() {
   document.getElementById('home').style.display = state.hasPaired ? 'none' : 'block';
   renderPanel('exp');
   renderPanel('inexp');
+  renderFixedList();
   renderGenBtn();
   renderResults();
+}
+
+function renderFixedList() {
+  document.getElementById('fixed-count').textContent = state.fixedPairs.length;
+  const list = document.getElementById('fixed-list');
+  if (!state.fixedPairs.length) {
+    list.innerHTML = '<div class="list-empty">Empty</div>';
+    return;
+  }
+  list.innerHTML = state.fixedPairs.map(fp => `
+    <div class="fixed-pair-row">
+      <input class="name-edit" type="text" maxlength="40" value="${esc(fp.aName)}"
+             autocomplete="off" autocorrect="off" spellcheck="false"
+             onchange="renameFixedPairPlayer(${fp.id}, 'a', this.value)"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">
+      <span class="fp-amp">&amp;</span>
+      <input class="name-edit" type="text" maxlength="40" value="${esc(fp.bName)}"
+             autocomplete="off" autocorrect="off" spellcheck="false"
+             onchange="renameFixedPairPlayer(${fp.id}, 'b', this.value)"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">
+      <button class="btn-remove" onclick="removeFixedPair(${fp.id})">×</button>
+    </div>
+  `).join('');
 }
 
 function renderPanel(type) {
@@ -265,8 +340,10 @@ function renderPanel(type) {
 }
 
 function renderGenBtn() {
-  const btn   = document.getElementById('btn-generate');
-  const ready = state.exp.length > 0 && state.inexp.length > 0;
+  const btn       = document.getElementById('btn-generate');
+  const hasFixed  = state.fixedPairs.length > 0;
+  const hasRandom = state.exp.length > 0 && state.inexp.length > 0;
+  const ready     = hasFixed || hasRandom;
   btn.className   = ready ? 'btn-generate active' : 'btn-generate';
   btn.textContent = 'Generate Teams';
 }
@@ -279,42 +356,79 @@ function renderResults() {
   const expById   = Object.fromEntries(state.exp.map(p => [p.id, p]));
   const inexpById = Object.fromEntries(state.inexp.map(p => [p.id, p]));
 
-  document.getElementById('pairs-list').innerHTML = state.pairs.length
-    ? state.pairs.map((pair, i) => {
-        const e = expById[pair.expId];
-        const n = inexpById[pair.inexpId];
-        if (!e || !n) return '';
-        const num  = String(i + 1).padStart(2, '0');
-        const nm   = pair.name ? esc(pair.name) : '';
-        const sel  = swapSelection;
-        const eSel = sel && sel.type === 'exp'   && sel.pairIdx === i ? ' selected' : '';
-        const nSel = sel && sel.type === 'inexp' && sel.pairIdx === i ? ' selected' : '';
-        return `
-          <div class="team-card">
-            <span class="team-num">${num}</span>
-            <div class="team-body">
-              <input
-                class="team-name-input"
-                type="text"
-                maxlength="40"
-                placeholder="Team ${num} (tap to name)"
-                value="${nm}"
-                autocomplete="off"
-                autocorrect="off"
-                spellcheck="false"
-                onchange="setTeamName(${i}, this.value)">
-              <div class="team-member exp${eSel}" onclick="selectForSwap('exp', ${i}, ${e.id})">
-                <span class="member-dot exp"></span>
-                <span class="member-name exp">${esc(e.name)}</span>
-              </div>
-              <hr class="team-hr">
-              <div class="team-member inexp${nSel}" onclick="selectForSwap('inexp', ${i}, ${n.id})">
-                <span class="member-dot inexp"></span>
-                <span class="member-name inexp">${esc(n.name)}</span>
-              </div>
-            </div>
-          </div>`;
-      }).join('')
+  const cards = [];
+  let teamNum = 0;
+
+  state.fixedPairs.forEach(fp => {
+    teamNum++;
+    const num = String(teamNum).padStart(2, '0');
+    const nm  = fp.name ? esc(fp.name) : '';
+    cards.push(`
+      <div class="team-card fixed">
+        <span class="team-num">${num}</span>
+        <div class="team-body">
+          <input
+            class="team-name-input"
+            type="text"
+            maxlength="40"
+            placeholder="Team ${num} (tap to name)"
+            value="${nm}"
+            autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
+            onchange="setFixedTeamName(${fp.id}, this.value)">
+          <div class="team-member set">
+            <span class="member-dot set"></span>
+            <span class="member-name set">${esc(fp.aName)}</span>
+          </div>
+          <hr class="team-hr">
+          <div class="team-member set">
+            <span class="member-dot set"></span>
+            <span class="member-name set">${esc(fp.bName)}</span>
+          </div>
+        </div>
+      </div>`);
+  });
+
+  state.pairs.forEach((pair, i) => {
+    const e = expById[pair.expId];
+    const n = inexpById[pair.inexpId];
+    if (!e || !n) return;
+    teamNum++;
+    const num  = String(teamNum).padStart(2, '0');
+    const nm   = pair.name ? esc(pair.name) : '';
+    const sel  = swapSelection;
+    const eSel = sel && sel.type === 'exp'   && sel.pairIdx === i ? ' selected' : '';
+    const nSel = sel && sel.type === 'inexp' && sel.pairIdx === i ? ' selected' : '';
+    cards.push(`
+      <div class="team-card">
+        <span class="team-num">${num}</span>
+        <div class="team-body">
+          <input
+            class="team-name-input"
+            type="text"
+            maxlength="40"
+            placeholder="Team ${num} (tap to name)"
+            value="${nm}"
+            autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
+            onchange="setTeamName(${i}, this.value)">
+          <div class="team-member exp${eSel}" onclick="selectForSwap('exp', ${i}, ${e.id})">
+            <span class="member-dot exp"></span>
+            <span class="member-name exp">${esc(e.name)}</span>
+          </div>
+          <hr class="team-hr">
+          <div class="team-member inexp${nSel}" onclick="selectForSwap('inexp', ${i}, ${n.id})">
+            <span class="member-dot inexp"></span>
+            <span class="member-name inexp">${esc(n.name)}</span>
+          </div>
+        </div>
+      </div>`);
+  });
+
+  document.getElementById('pairs-list').innerHTML = cards.length
+    ? cards.join('')
     : '<div class="list-empty">No teams</div>';
 
   const hint = document.getElementById('swap-hint');
@@ -361,6 +475,10 @@ function buildExportText() {
 
   const lines = [];
 
+  state.fixedPairs.forEach(fp => {
+    lines.push(fp.name || `${fp.aName} & ${fp.bName}`);
+  });
+
   state.pairs.forEach(pair => {
     const e = expById[pair.expId];
     const n = inexpById[pair.inexpId];
@@ -405,7 +523,7 @@ function renderPresetsList() {
     <div class="preset-row">
       <div class="preset-info">
         <span class="preset-name">${esc(p.name)}</span>
-        <span class="preset-counts">${p.exp.length} exp &middot; ${p.inexp.length} inexp</span>
+        <span class="preset-counts">${p.exp.length} exp &middot; ${p.inexp.length} inexp${(p.fixedPairs && p.fixedPairs.length) ? ` &middot; ${p.fixedPairs.length} set` : ''}</span>
       </div>
       <div class="preset-actions">
         <button class="btn-preset-load"   onclick="loadPreset(${p.id})">Load</button>
@@ -420,20 +538,22 @@ function saveCurrentAsPreset() {
   const input = document.getElementById('preset-save-name');
   const name  = input.value.trim();
   if (!name) return;
-  if (!state.exp.length && !state.inexp.length) {
+  if (!state.exp.length && !state.inexp.length && !state.fixedPairs.length) {
     alert('Add some players to the roster first.');
     return;
   }
   const expNames   = state.exp.map(p => p.name);
   const inexpNames = state.inexp.map(p => p.name);
+  const fixedSaved = state.fixedPairs.map(fp => ({ aName: fp.aName, bName: fp.bName }));
   const existing   = presets.find(p => p.name.toLowerCase() === name.toLowerCase());
   if (existing) {
     if (!confirm(`Preset "${existing.name}" already exists. Overwrite it?`)) return;
     existing.name  = name;
     existing.exp   = expNames;
     existing.inexp = inexpNames;
+    existing.fixedPairs = fixedSaved;
   } else {
-    presets.push({ id: Date.now(), name, exp: expNames, inexp: inexpNames });
+    presets.push({ id: Date.now(), name, exp: expNames, inexp: inexpNames, fixedPairs: fixedSaved });
   }
   savePresets();
   input.value = '';
@@ -443,13 +563,14 @@ function saveCurrentAsPreset() {
 function loadPreset(id) {
   const preset = presets.find(p => p.id === id);
   if (!preset) return;
-  if (state.exp.length || state.inexp.length) {
+  if (state.exp.length || state.inexp.length || state.fixedPairs.length) {
     if (!confirm(`Replace the current roster with "${preset.name}"?`)) return;
   }
-  state.exp       = preset.exp.map(n => ({ id: nextId(), name: n }));
-  state.inexp     = preset.inexp.map(n => ({ id: nextId(), name: n }));
-  state.pairs     = [];
-  state.hasPaired = false;
+  state.exp        = preset.exp.map(n => ({ id: nextId(), name: n }));
+  state.inexp      = preset.inexp.map(n => ({ id: nextId(), name: n }));
+  state.fixedPairs = (preset.fixedPairs || []).map(fp => ({ id: nextId(), aName: fp.aName, bName: fp.bName }));
+  state.pairs      = [];
+  state.hasPaired  = false;
   saveState();
   render();
   hidePresets();
