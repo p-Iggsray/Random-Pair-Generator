@@ -35,6 +35,10 @@ const PRESETS_KEY = 'tp_presets';
 
 let presets = [];
 
+// In-progress swap selection on the Results screen. Null when no player is selected.
+// Shape: { type: 'exp'|'inexp', pairIdx: number, playerId: number }
+let swapSelection = null;
+
 async function saveState() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -121,6 +125,7 @@ function pairUnpaired() {
   for (let i = 0; i < count; i++) {
     state.pairs.push({ expId: sExp[i].id, inexpId: sInexp[i].id });
   }
+  swapSelection = null;
   saveState();
   render();
 }
@@ -148,6 +153,41 @@ function renamePlayer(type, id, value) {
   if (name === player.name) return;
   player.name = name;
   saveState();
+}
+
+// Tap a player on the Results screen to start a swap, then tap another player
+// of the same category on a different team to complete the swap. Tapping the
+// same player cancels. Cross-category taps move the selection to the new player.
+function selectForSwap(type, pairIdx, playerId) {
+  if (!state.hasPaired) return;
+  const sel = swapSelection;
+
+  if (sel && sel.type === type && sel.playerId === playerId) {
+    swapSelection = null;
+    renderResults();
+    return;
+  }
+
+  if (!sel || sel.type !== type) {
+    swapSelection = { type, pairIdx, playerId };
+    renderResults();
+    return;
+  }
+
+  const a = state.pairs[sel.pairIdx];
+  const b = state.pairs[pairIdx];
+  if (!a || !b || sel.pairIdx === pairIdx) {
+    swapSelection = null;
+    renderResults();
+    return;
+  }
+  const key = type === 'exp' ? 'expId' : 'inexpId';
+  const tmp = a[key];
+  a[key]   = b[key];
+  b[key]   = tmp;
+  swapSelection = null;
+  saveState();
+  renderResults();
 }
 
 function generatePairs() {
@@ -178,6 +218,7 @@ function resetTeams() {
   const btn = document.getElementById('btn-back');
   if (btn.classList.contains('armed')) {
     disarmReset();
+    swapSelection  = null;
     state.pairs     = [];
     state.hasPaired = false;
     saveState();
@@ -245,6 +286,9 @@ function renderResults() {
         if (!e || !n) return '';
         const num  = String(i + 1).padStart(2, '0');
         const nm   = pair.name ? esc(pair.name) : '';
+        const sel  = swapSelection;
+        const eSel = sel && sel.type === 'exp'   && sel.pairIdx === i ? ' selected' : '';
+        const nSel = sel && sel.type === 'inexp' && sel.pairIdx === i ? ' selected' : '';
         return `
           <div class="team-card">
             <span class="team-num">${num}</span>
@@ -259,12 +303,12 @@ function renderResults() {
                 autocorrect="off"
                 spellcheck="false"
                 onchange="setTeamName(${i}, this.value)">
-              <div class="team-member">
+              <div class="team-member exp${eSel}" onclick="selectForSwap('exp', ${i}, ${e.id})">
                 <span class="member-dot exp"></span>
                 <span class="member-name exp">${esc(e.name)}</span>
               </div>
               <hr class="team-hr">
-              <div class="team-member">
+              <div class="team-member inexp${nSel}" onclick="selectForSwap('inexp', ${i}, ${n.id})">
                 <span class="member-dot inexp"></span>
                 <span class="member-name inexp">${esc(n.name)}</span>
               </div>
@@ -272,6 +316,16 @@ function renderResults() {
           </div>`;
       }).join('')
     : '<div class="list-empty">No teams</div>';
+
+  const hint = document.getElementById('swap-hint');
+  if (swapSelection) {
+    const cat = swapSelection.type === 'exp' ? 'experienced' : 'inexperienced';
+    hint.textContent = `Tap another ${cat} player to swap, or tap the same one to cancel.`;
+    hint.className   = `swap-hint show ${swapSelection.type}`;
+  } else {
+    hint.className   = 'swap-hint';
+    hint.textContent = '';
+  }
 
   const uExp      = unpairedExp();
   const uExpBlock = document.getElementById('unpaired-exp-block');
