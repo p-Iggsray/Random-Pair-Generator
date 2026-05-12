@@ -16,6 +16,10 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+if (navigator.storage && navigator.storage.persist) {
+  navigator.storage.persist().catch(() => {});
+}
+
 const state = {
   exp:       [],
   inexp:     [],
@@ -26,17 +30,19 @@ const state = {
 
 // ---- persistence ----
 
+const STORAGE_KEY = 'tp_v2';
+
 async function saveState() {
   try {
-    await window.storage.set('tp_v2', JSON.stringify(state));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     flashDot();
   } catch(e) {}
 }
 
 async function loadState() {
   try {
-    const r = await window.storage.get('tp_v2');
-    if (r && r.value) Object.assign(state, JSON.parse(r.value));
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) Object.assign(state, JSON.parse(raw));
   } catch(e) {}
 }
 
