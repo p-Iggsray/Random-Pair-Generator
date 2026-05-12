@@ -1,6 +1,6 @@
 {
-  "name": "Tournament Pairing",
-  "short_name": "Pairing",
+  "name": "Smash Pairing",
+  "short_name": "Smash Pairing",
   "description": "Random team generator for Smash tournaments",
   "start_url": "./",
   "scope": "./",
