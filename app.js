@@ -88,23 +88,22 @@ function addPlayer(type) {
   const input = document.getElementById(type + '-input');
   const name  = input.value.trim();
   if (!name) return;
-  const player = { id: nextId(), name };
-  state[type].push(player);
-
-  if (state.hasPaired) {
-    const opposite = type === 'exp' ? 'inexp' : 'exp';
-    const waiting = opposite === 'exp' ? unpairedExp() : unpairedInexp();
-    if (waiting.length) {
-      const partner = waiting[0];
-      state.pairs.push({
-        expId:   type === 'exp' ? player.id  : partner.id,
-        inexpId: type === 'exp' ? partner.id : player.id
-      });
-    }
-  }
-
+  state[type].push({ id: nextId(), name });
   input.value = '';
   input.focus();
+  saveState();
+  render();
+}
+
+function pairUnpaired() {
+  if (!state.hasPaired) return;
+  const sExp   = shuffle(unpairedExp());
+  const sInexp = shuffle(unpairedInexp());
+  const count  = Math.min(sExp.length, sInexp.length);
+  if (!count) return;
+  for (let i = 0; i < count; i++) {
+    state.pairs.push({ expId: sExp[i].id, inexpId: sInexp[i].id });
+  }
   saveState();
   render();
 }
@@ -229,6 +228,11 @@ function renderResults() {
   } else {
     uInexpBlock.style.display = 'none';
   }
+
+  const canPair = uExp.length > 0 && uInexp.length > 0;
+  const pairBtn = document.getElementById('btn-pair-unpaired');
+  pairBtn.style.display = canPair ? 'block' : 'none';
+  pairBtn.textContent   = `Pair ${Math.min(uExp.length, uInexp.length)} Waiting`;
 }
 
 // ---- Challonge export ----
