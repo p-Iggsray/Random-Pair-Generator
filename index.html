@@ -74,6 +74,18 @@
     <div id="unpaired-inexp-tags"></div>
   </div>
 
+<div class="results-add">
+  <div class="section-label">Add Player</div>
+  <div class="input-row exp">
+    <input type="text" id="exp-input-r" placeholder="Experienced name" maxlength="40" autocomplete="off" autocorrect="off">
+    <button class="btn-add exp" aria-label="Add experienced" onclick="addPlayer('exp', 'exp-input-r')">+</button>
+  </div>
+  <div class="input-row inexp">
+    <input type="text" id="inexp-input-r" placeholder="Inexperienced name" maxlength="40" autocomplete="off" autocorrect="off">
+    <button class="btn-add inexp" aria-label="Add inexperienced" onclick="addPlayer('inexp', 'inexp-input-r')">+</button>
+  </div>
+</div>
+
 <button class="btn-pair-unpaired" id="btn-pair-unpaired" onclick="pairUnpaired()" style="display:none;">Pair Waiting</button>
 
 <button class="btn-challonge" onclick="showExport()">Export for Challonge</button>

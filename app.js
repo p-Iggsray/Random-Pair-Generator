@@ -84,8 +84,8 @@ function unpairedInexp() {
 
 // ---- actions ----
 
-function addPlayer(type) {
-  const input = document.getElementById(type + '-input');
+function addPlayer(type, inputId) {
+  const input = document.getElementById(inputId || (type + '-input'));
   const name  = input.value.trim();
   if (!name) return;
   state[type].push({ id: nextId(), name });
@@ -319,6 +319,12 @@ document.getElementById('exp-input').addEventListener('keydown', e => {
 });
 document.getElementById('inexp-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') addPlayer('inexp');
+});
+document.getElementById('exp-input-r').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addPlayer('exp', 'exp-input-r');
+});
+document.getElementById('inexp-input-r').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addPlayer('inexp', 'inexp-input-r');
 });
 
 (async () => { await loadState(); render(); })();

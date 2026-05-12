@@ -146,6 +146,23 @@ input[type="text"]::placeholder { color: var(--muted); }
 
 .btn-add:active { background: #263660; }
 
+.btn-add.inexp {
+  background: #0a2420;
+  color: var(--inexp);
+  border-color: #12483a;
+}
+
+.btn-add.inexp:active { background: #123028; }
+
+.results-add {
+  margin-top: 18px;
+  margin-bottom: 4px;
+}
+
+.results-add .section-label {
+  margin-bottom: 8px;
+}
+
 .name-list {
   display: flex;
   flex-direction: column;
