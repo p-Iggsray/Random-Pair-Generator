@@ -235,23 +235,6 @@ input[type="text"]::placeholder { color: var(--muted); }
 
 .btn-generate.active:active { opacity: 0.75; }
 
-.btn-generate.done {
-  background: var(--surface);
-  border-color: var(--border);
-  color: var(--dim);
-  cursor: not-allowed;
-}
-
-.post-note {
-  font-size: 0.62rem;
-  color: var(--dim);
-  text-align: center;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-bottom: 12px;
-  display: none;
-}
-
 #results { display: none; }
 #results.show { display: block; }
 

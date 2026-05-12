@@ -135,7 +135,7 @@ function generatePairs() {
 }
 
 // Clears pairs only. Every player stays in their list and becomes editable again.
-function backToMenu() {
+function resetTeams() {
   state.pairs     = [];
   state.hasPaired = false;
   saveState();
@@ -145,6 +145,7 @@ function backToMenu() {
 // ---- render ----
 
 function render() {
+  document.getElementById('home').style.display = state.hasPaired ? 'none' : 'block';
   renderPanel('exp');
   renderPanel('inexp');
   renderGenBtn();
@@ -172,19 +173,10 @@ function renderPanel(type) {
 }
 
 function renderGenBtn() {
-  const btn  = document.getElementById('btn-generate');
-  const note = document.getElementById('post-note');
-
-  if (state.hasPaired) {
-    btn.className   = 'btn-generate done';
-    btn.textContent = 'Teams Generated';
-    note.style.display = 'block';
-  } else {
-    const ready     = state.exp.length > 0 && state.inexp.length > 0;
-    btn.className   = ready ? 'btn-generate active' : 'btn-generate';
-    btn.textContent = 'Generate Teams';
-    note.style.display = 'none';
-  }
+  const btn   = document.getElementById('btn-generate');
+  const ready = state.exp.length > 0 && state.inexp.length > 0;
+  btn.className   = ready ? 'btn-generate active' : 'btn-generate';
+  btn.textContent = 'Generate Teams';
 }
 
 function renderResults() {
