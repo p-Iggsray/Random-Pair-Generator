@@ -274,6 +274,50 @@ function buildExportText() {
   return lines.join('\n');
 }
 
+function openBulkAdd(type) {
+  const modal = document.getElementById('bulk-modal');
+  modal.dataset.type = type;
+  document.getElementById('bulk-title').textContent =
+    type === 'exp' ? 'Add Experienced' : 'Add Inexperienced';
+  const ta = document.getElementById('bulk-text');
+  ta.value = '';
+  updateBulkCount();
+  modal.classList.add('open');
+  setTimeout(() => ta.focus(), 100);
+}
+
+function hideBulkAdd() {
+  document.getElementById('bulk-modal').classList.remove('open');
+}
+
+function handleBulkBackdropClick(e) {
+  if (e.target === document.getElementById('bulk-modal')) hideBulkAdd();
+}
+
+function parseBulkNames(text) {
+  return text.split('\n').map(s => s.trim()).filter(Boolean);
+}
+
+function updateBulkCount() {
+  const names = parseBulkNames(document.getElementById('bulk-text').value);
+  const btn   = document.getElementById('btn-bulk-add');
+  btn.textContent = `Add ${names.length} ${names.length === 1 ? 'Player' : 'Players'}`;
+  btn.disabled    = names.length === 0;
+}
+
+function addBulkPlayers() {
+  const modal = document.getElementById('bulk-modal');
+  const type  = modal.dataset.type;
+  const names = parseBulkNames(document.getElementById('bulk-text').value);
+  if (!names.length || (type !== 'exp' && type !== 'inexp')) return;
+  for (const name of names) {
+    state[type].push({ id: nextId(), name });
+  }
+  saveState();
+  render();
+  hideBulkAdd();
+}
+
 function showExport() {
   document.getElementById('export-text').value = buildExportText();
   document.getElementById('export-modal').classList.add('open');
