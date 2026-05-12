@@ -244,6 +244,29 @@ input[type="text"]::placeholder { color: var(--muted); }
 
 .btn-remove:active { color: #ef4444; background: rgba(239,68,68,0.08); }
 
+.name-edit {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+  padding: 0;
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 16px; /* prevents iOS auto-zoom on focus */
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: border-bottom-color 0.15s;
+}
+
+.name-edit:focus { border-bottom-color: #4f6ef7; }
+
 .list-empty {
   font-size: 0.68rem;
   color: var(--dim);
