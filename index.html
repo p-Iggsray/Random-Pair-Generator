@@ -17,8 +17,8 @@
   <link rel="icon" type="image/svg+xml" href="icon.svg?v=3">
   <link rel="manifest" href="manifest.webmanifest?v=3">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="theme.css?v=10">
-  <link rel="stylesheet" href="styles.css?v=10">
+  <link rel="stylesheet" href="theme.css?v=11">
+  <link rel="stylesheet" href="styles.css?v=11">
 </head>
 <body>
 
@@ -30,6 +30,15 @@
 </header>
 
 <div id="home">
+
+<div class="home-actions">
+  <button class="btn-presets" onclick="openPresets()">
+    <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" aria-hidden="true">
+      <path d="M4 1.5h8a1.5 1.5 0 0 1 1.5 1.5v11.5l-5.5-3-5.5 3V3A1.5 1.5 0 0 1 4 1.5z"/>
+    </svg>
+    Presets
+  </button>
+</div>
 
 <div class="panels">
   <div class="panel">
@@ -116,6 +125,26 @@
 
 </div>
 
+<!-- Roster presets modal -->
+
+<div class="modal-backdrop" id="presets-modal" onclick="handlePresetsBackdropClick(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">Roster Presets</span>
+      <span class="modal-hint">Tap Load to use a preset</span>
+    </div>
+    <div class="preset-list" id="preset-list"></div>
+    <div class="preset-save-row">
+      <input type="text" id="preset-save-name" placeholder="Save current roster as..." maxlength="40" autocomplete="off" autocorrect="off">
+      <button class="btn-preset-save" id="btn-preset-save" onclick="saveCurrentAsPreset()">Save</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-close-modal" onclick="hidePresets()">Done</button>
+    </div>
+  </div>
+</div>
+
 <!-- Bulk add modal -->
 
 <div class="modal-backdrop" id="bulk-modal" onclick="handleBulkBackdropClick(event)">
@@ -150,7 +179,7 @@
   </div>
 </div>
 
-<script src="app.js?v=10"></script>
+<script src="app.js?v=11"></script>
 
 </body>
 </html>

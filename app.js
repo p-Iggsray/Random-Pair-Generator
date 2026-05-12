@@ -31,6 +31,9 @@ const state = {
 // ---- persistence ----
 
 const STORAGE_KEY = 'tp_v2';
+const PRESETS_KEY = 'tp_presets';
+
+let presets = [];
 
 async function saveState() {
   try {
@@ -43,6 +46,20 @@ async function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) Object.assign(state, JSON.parse(raw));
+  } catch(e) {}
+}
+
+function savePresets() {
+  try {
+    localStorage.setItem(PRESETS_KEY, JSON.stringify(presets));
+    flashDot();
+  } catch(e) {}
+}
+
+function loadPresetsFromStorage() {
+  try {
+    const raw = localStorage.getItem(PRESETS_KEY);
+    if (raw) presets = JSON.parse(raw);
   } catch(e) {}
 }
 
@@ -274,6 +291,108 @@ function buildExportText() {
   return lines.join('\n');
 }
 
+// ---- roster presets ----
+
+function openPresets() {
+  document.getElementById('preset-save-name').value = '';
+  renderPresetsList();
+  document.getElementById('presets-modal').classList.add('open');
+}
+
+function hidePresets() {
+  document.getElementById('presets-modal').classList.remove('open');
+}
+
+function handlePresetsBackdropClick(e) {
+  if (e.target === document.getElementById('presets-modal')) hidePresets();
+}
+
+function renderPresetsList() {
+  const list = document.getElementById('preset-list');
+  if (!presets.length) {
+    list.innerHTML = '<div class="preset-empty">No presets yet. Save the current roster below.</div>';
+    return;
+  }
+  list.innerHTML = presets.map(p => `
+    <div class="preset-row">
+      <div class="preset-info">
+        <span class="preset-name">${esc(p.name)}</span>
+        <span class="preset-counts">${p.exp.length} exp &middot; ${p.inexp.length} inexp</span>
+      </div>
+      <div class="preset-actions">
+        <button class="btn-preset-load"   onclick="loadPreset(${p.id})">Load</button>
+        <button class="btn-preset-rename" onclick="renamePreset(${p.id})">Rename</button>
+        <button class="btn-preset-delete" onclick="deletePreset(${p.id})">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function saveCurrentAsPreset() {
+  const input = document.getElementById('preset-save-name');
+  const name  = input.value.trim();
+  if (!name) return;
+  if (!state.exp.length && !state.inexp.length) {
+    alert('Add some players to the roster first.');
+    return;
+  }
+  const expNames   = state.exp.map(p => p.name);
+  const inexpNames = state.inexp.map(p => p.name);
+  const existing   = presets.find(p => p.name.toLowerCase() === name.toLowerCase());
+  if (existing) {
+    if (!confirm(`Preset "${existing.name}" already exists. Overwrite it?`)) return;
+    existing.name  = name;
+    existing.exp   = expNames;
+    existing.inexp = inexpNames;
+  } else {
+    presets.push({ id: Date.now(), name, exp: expNames, inexp: inexpNames });
+  }
+  savePresets();
+  input.value = '';
+  renderPresetsList();
+}
+
+function loadPreset(id) {
+  const preset = presets.find(p => p.id === id);
+  if (!preset) return;
+  if (state.exp.length || state.inexp.length) {
+    if (!confirm(`Replace the current roster with "${preset.name}"?`)) return;
+  }
+  state.exp       = preset.exp.map(n => ({ id: nextId(), name: n }));
+  state.inexp     = preset.inexp.map(n => ({ id: nextId(), name: n }));
+  state.pairs     = [];
+  state.hasPaired = false;
+  saveState();
+  render();
+  hidePresets();
+}
+
+function renamePreset(id) {
+  const preset = presets.find(p => p.id === id);
+  if (!preset) return;
+  const newName = prompt('Rename preset:', preset.name);
+  if (newName === null) return;
+  const trimmed = newName.trim();
+  if (!trimmed) return;
+  const clash = presets.find(p => p.id !== id && p.name.toLowerCase() === trimmed.toLowerCase());
+  if (clash) {
+    alert(`Another preset is already called "${clash.name}".`);
+    return;
+  }
+  preset.name = trimmed;
+  savePresets();
+  renderPresetsList();
+}
+
+function deletePreset(id) {
+  const preset = presets.find(p => p.id === id);
+  if (!preset) return;
+  if (!confirm(`Delete preset "${preset.name}"?`)) return;
+  presets = presets.filter(p => p.id !== id);
+  savePresets();
+  renderPresetsList();
+}
+
 function openBulkAdd(type) {
   const modal = document.getElementById('bulk-modal');
   modal.dataset.type = type;
@@ -371,4 +490,4 @@ document.getElementById('inexp-input-r').addEventListener('keydown', e => {
   if (e.key === 'Enter') addPlayer('inexp', 'inexp-input-r');
 });
 
-(async () => { await loadState(); render(); })();
+(async () => { await loadState(); loadPresetsFromStorage(); render(); })();
