@@ -400,18 +400,32 @@ input[type="text"]::placeholder { color: var(--muted); }
 /* Team cards (stacked members, not versus) */
 .team-card {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 14px;
-  margin-bottom: 9px;
+  border: 2px solid var(--border);
+  border-radius: 11px;
+  padding: 13px 14px;
+  margin-bottom: 11px;
   display: flex;
   align-items: stretch;
   gap: 12px;
+  /* Smash fighter-card feel: top edge highlight inside + lifted drop shadow
+     outside. The combination of slightly thicker border + inner highlight +
+     outer shadow is what reads as "card object" rather than "list row" at
+     mobile scale. */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 5px 16px rgba(0, 0, 0, 0.38);
 }
 
 .team-card.fixed {
-  border-left: 3px solid var(--set);
-  padding-left: 11px;
+  border-left-width: 4px;
+  border-left-color: var(--set);
+  padding-left: 12px;
+  /* Gold-tinted top highlight + faint outer gold halo so the Set Teams card
+     subtly glows in its category color, on top of the base drop shadow. */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 201, 77, 0.22),
+    0 5px 16px rgba(0, 0, 0, 0.38),
+    0 0 20px rgba(255, 201, 77, 0.08);
 }
 
 .team-card.fixed .team-num { color: var(--set); }
