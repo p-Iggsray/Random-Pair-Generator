@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="360" viewBox="0 0 360 360" aria-hidden="true">
+  <!--
+    Sparse starfield tile, designed to read as "Smash space stage" wallpaper
+    behind the app. Mostly white pinpricks at low opacity, a few warm gold
+    accents to tie to the icon halo, and a handful of tiny cross sparks that
+    quietly echo the Smash cross emblem.
+    Tiles via background-repeat in styles.css.
+  -->
+
+  <!-- tiny pinpricks -->
+  <circle cx="22"  cy="38"  r="1"   fill="#ffffff" opacity="0.4"/>
+  <circle cx="95"  cy="22"  r="1.5" fill="#ffffff" opacity="0.5"/>
+  <circle cx="178" cy="55"  r="1"   fill="#ffffff" opacity="0.35"/>
+  <circle cx="248" cy="32"  r="1"   fill="#ffffff" opacity="0.4"/>
+
+  <circle cx="62"  cy="105" r="1"   fill="#ffffff" opacity="0.35"/>
+  <circle cx="215" cy="118" r="1"   fill="#ffffff" opacity="0.4"/>
+  <circle cx="285" cy="135" r="1"   fill="#ffffff" opacity="0.3"/>
+  <circle cx="345" cy="148" r="1"   fill="#ffffff" opacity="0.35"/>
+
+  <circle cx="88"  cy="195" r="1"   fill="#ffffff" opacity="0.4"/>
+  <circle cx="158" cy="178" r="1"   fill="#ffffff" opacity="0.35"/>
+  <circle cx="305" cy="195" r="1"   fill="#ffffff" opacity="0.4"/>
+
+  <circle cx="48"  cy="252" r="1"   fill="#ffffff" opacity="0.4"/>
+  <circle cx="118" cy="275" r="1"   fill="#ffffff" opacity="0.3"/>
+  <circle cx="262" cy="282" r="1"   fill="#ffffff" opacity="0.4"/>
+  <circle cx="328" cy="262" r="1"   fill="#ffffff" opacity="0.35"/>
+
+  <circle cx="25"  cy="328" r="1"   fill="#ffffff" opacity="0.35"/>
+  <circle cx="178" cy="332" r="1"   fill="#ffffff" opacity="0.3"/>
+  <circle cx="255" cy="345" r="1"   fill="#ffffff" opacity="0.4"/>
+  <circle cx="322" cy="325" r="1"   fill="#ffffff" opacity="0.35"/>
+
+  <!-- medium twinkle stars -->
+  <circle cx="135" cy="92"  r="2.5" fill="#ffffff" opacity="0.55"/>
+  <circle cx="238" cy="208" r="1.7" fill="#ffffff" opacity="0.5"/>
+  <circle cx="95"  cy="345" r="1.5" fill="#ffffff" opacity="0.45"/>
+
+  <!-- warm gold accents -->
+  <circle cx="318" cy="68"  r="2"   fill="#ffc94d" opacity="0.4"/>
+  <circle cx="15"  cy="172" r="2"   fill="#ffc94d" opacity="0.35"/>
+  <circle cx="188" cy="265" r="2.5" fill="#ffc94d" opacity="0.4"/>
+
+  <!-- tiny cross sparks: distant stars that quietly nod to the Smash cross -->
+  <g transform="translate(165 138)" opacity="0.35">
+    <line x1="0"  y1="-4" x2="0" y2="4" stroke="#ffffff" stroke-width="0.7" stroke-linecap="round"/>
+    <line x1="-4" y1="0"  x2="4" y2="0" stroke="#ffffff" stroke-width="0.7" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(295 95)" opacity="0.3">
+    <line x1="0"  y1="-3" x2="0" y2="3" stroke="#ffc94d" stroke-width="0.7" stroke-linecap="round"/>
+    <line x1="-3" y1="0"  x2="3" y2="0" stroke="#ffc94d" stroke-width="0.7" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(72 222)" opacity="0.3">
+    <line x1="0"  y1="-3" x2="0" y2="3" stroke="#ffffff" stroke-width="0.7" stroke-linecap="round"/>
+    <line x1="-3" y1="0"  x2="3" y2="0" stroke="#ffffff" stroke-width="0.7" stroke-linecap="round"/>
+  </g>
+</svg>
