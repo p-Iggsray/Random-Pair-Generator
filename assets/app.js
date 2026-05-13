@@ -271,6 +271,35 @@ function generatePairs() {
   state.hasPaired = true;
   saveState();
   render();
+  fireConfetti();
+}
+
+// One-shot celebratory confetti burst on Generate. Lightweight CSS-only
+// particles: ~40 small absolutely-positioned divs drop from above the
+// viewport with randomized x position, horizontal drift, rotation, size
+// and duration so the burst feels chaotic rather than rigid. The container
+// is removed from the DOM ~2.5s after creation. Skips entirely under
+// prefers-reduced-motion.
+const CONFETTI_COLORS = ['#e8442e', '#ffc94d', '#4d9fff', '#2ee8a0', '#fffcef'];
+
+function fireConfetti() {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const container = document.createElement('div');
+  container.className = 'confetti-burst';
+  for (let i = 0; i < 40; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.setProperty('--c',        CONFETTI_COLORS[i % CONFETTI_COLORS.length]);
+    piece.style.setProperty('--x',        (Math.random() * 100).toFixed(2) + 'vw');
+    piece.style.setProperty('--dx',       ((Math.random() - 0.5) * 200).toFixed(0) + 'px');
+    piece.style.setProperty('--rot',      Math.floor(Math.random() * 720) + 'deg');
+    piece.style.setProperty('--size',     (4 + Math.random() * 6).toFixed(1) + 'px');
+    piece.style.setProperty('--delay',    (Math.random() * 0.3).toFixed(2) + 's');
+    piece.style.setProperty('--duration', (1.2 + Math.random() * 0.6).toFixed(2) + 's');
+    container.appendChild(piece);
+  }
+  document.body.appendChild(container);
+  setTimeout(() => container.remove(), 2500);
 }
 
 // Two-tap reset. First tap arms the button (red styling + "Tap again to confirm").
