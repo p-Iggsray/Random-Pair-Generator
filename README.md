@@ -45,7 +45,7 @@ Open it from the Home Screen and it runs full-screen like a native app.
 
 ## Running locally
 
-It's three static files (`index.html`, `app.js`, `styles.css`) plus a service worker, manifest, and icon. No build step.
+It's a handful of static files. `index.html`, `service-worker.js`, and `manifest.webmanifest` live at the root; everything else (JS, CSS, SVG) is in `assets/`. No build step.
 
 ```bash
 # any static server works
