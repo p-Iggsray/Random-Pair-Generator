@@ -941,6 +941,8 @@ input[type="text"]::placeholder { color: var(--muted); }
 
 #save-dot.flash { opacity: 1; }
 
+html.splash-skip #splash { display: none; }
+
 #splash {
   position: fixed;
   inset: 0;
