@@ -599,14 +599,56 @@ input[type="text"]::placeholder { color: var(--muted); }
 
 .team-member:active { background: rgba(255, 255, 255, 0.04); }
 
+/* Selected swap player breathes so it is obviously the "active" pick. Pulse
+   matches the 1.8s rhythm used by the Generate button and the team-name
+   underline pulse - one design language across the app. Background alpha
+   and outline width/alpha both animate, so the selection both brightens
+   and tightens at peak. */
 .team-member.selected.exp {
-  background: rgba(77, 159, 255, 0.12);
-  box-shadow: inset 0 0 0 1.5px var(--exp);
+  background: rgba(77, 159, 255, 0.08);
+  box-shadow: inset 0 0 0 1.5px rgba(77, 159, 255, 0.55);
+  animation: swap-pulse-exp 1.8s ease-in-out infinite;
 }
 
 .team-member.selected.inexp {
-  background: rgba(46, 232, 160, 0.12);
-  box-shadow: inset 0 0 0 1.5px var(--inexp);
+  background: rgba(46, 232, 160, 0.08);
+  box-shadow: inset 0 0 0 1.5px rgba(46, 232, 160, 0.55);
+  animation: swap-pulse-inexp 1.8s ease-in-out infinite;
+}
+
+@keyframes swap-pulse-exp {
+  0%, 100% {
+    background: rgba(77, 159, 255, 0.08);
+    box-shadow: inset 0 0 0 1.5px rgba(77, 159, 255, 0.55);
+  }
+  50% {
+    background: rgba(77, 159, 255, 0.22);
+    box-shadow: inset 0 0 0 2px rgba(77, 159, 255, 1);
+  }
+}
+
+@keyframes swap-pulse-inexp {
+  0%, 100% {
+    background: rgba(46, 232, 160, 0.08);
+    box-shadow: inset 0 0 0 1.5px rgba(46, 232, 160, 0.55);
+  }
+  50% {
+    background: rgba(46, 232, 160, 0.22);
+    box-shadow: inset 0 0 0 2px rgba(46, 232, 160, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .team-member.selected.exp,
+  .team-member.selected.inexp { animation: none; }
+  .team-member.selected.exp {
+    background: rgba(77, 159, 255, 0.18);
+    box-shadow: inset 0 0 0 2px var(--exp);
+  }
+  .team-member.selected.inexp {
+    background: rgba(46, 232, 160, 0.18);
+    box-shadow: inset 0 0 0 2px var(--inexp);
+  }
 }
 
 .swap-hint {
