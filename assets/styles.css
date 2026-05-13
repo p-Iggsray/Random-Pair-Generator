@@ -1080,7 +1080,53 @@ input[type="text"]::placeholder { color: var(--muted); }
 
 #save-dot.flash { opacity: 1; }
 
-html.splash-skip #splash { display: none; }
+/* One-shot confetti burst on Generate. Container is added to <body> by
+   fireConfetti() and removed ~2.5s later. Each .confetti-piece reads its
+   color/position/drift/rotation/size/timing from CSS custom properties set
+   inline by the JS, so the animation logic stays here and only the random
+   numbers come from JS. */
+.confetti-burst {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -20px;
+  left: var(--x);
+  width: var(--size);
+  height: var(--size);
+  background: var(--c);
+  border-radius: 1px;
+  animation: confetti-fall var(--duration) ease-in var(--delay) forwards;
+}
+
+/* Every third piece is a vertical streamer rather than a square - gives the
+   burst a mix of confetti and party-streamer shapes. */
+.confetti-piece:nth-child(3n) {
+  width: calc(var(--size) * 0.45);
+  height: calc(var(--size) * 1.6);
+  border-radius: 0;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  85% { opacity: 1; }
+  100% {
+    transform: translate(var(--dx), 110vh) rotate(var(--rot));
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confetti-burst { display: none; }
+}
 
 #splash {
   position: fixed;
