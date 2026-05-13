@@ -375,13 +375,46 @@ input[type="text"]::placeholder { color: var(--muted); }
 }
 
 .btn-generate.active {
-  background: linear-gradient(120deg, #1a2e5c 0%, #1e1040 100%);
-  border-color: #2a4080;
-  color: var(--text);
+  background: linear-gradient(120deg,
+    #e8442e 0%,
+    #c93820 35%,
+    #b03018 60%,
+    #d4882a 85%,
+    #ffd76e 100%);
+  border-color: rgba(255, 201, 77, 0.6);
+  color: #fffcef;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
   cursor: pointer;
+  /* Slow breathing pulse: a gold halo ring expands outward and fades while
+     the drop shadow swells slightly. The single most-tapped surface in the
+     app now visibly invites the tap. */
+  animation: btn-generate-pulse 1.8s ease-in-out infinite;
 }
 
-.btn-generate.active:active { opacity: 0.75; }
+@keyframes btn-generate-pulse {
+  0%, 100% {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      0 0 0 0 rgba(255, 201, 77, 0.5),
+      0 4px 12px rgba(232, 68, 46, 0.28);
+  }
+  50% {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.25),
+      0 0 0 6px rgba(255, 201, 77, 0),
+      0 6px 16px rgba(232, 68, 46, 0.45);
+  }
+}
+
+.btn-generate.active:active {
+  animation: none;
+  opacity: 0.88;
+  transform: scale(0.985);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-generate.active { animation: none; }
+}
 
 #results { display: none; }
 #results.show { display: block; }
