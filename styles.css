@@ -42,6 +42,8 @@ header h1 {
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  /* Smash-logo lean - brand moment, more pronounced than the functional labels. */
+  transform: skewX(-10deg);
 }
 
 header p {
@@ -116,6 +118,9 @@ header p {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  /* Subtle slash on functional labels. inline-block lets the transform apply. */
+  display: inline-block;
+  transform: skewX(-6deg);
 }
 
 .panel-label.exp   { color: var(--exp); }
@@ -388,6 +393,8 @@ input[type="text"]::placeholder { color: var(--muted); }
   letter-spacing: 0.16em;
   color: var(--dim);
   margin-bottom: 10px;
+  transform: skewX(-6deg);
+  transform-origin: left center;
 }
 
 /* Team cards (stacked members, not versus) */
@@ -535,6 +542,8 @@ input[type="text"]::placeholder { color: var(--muted); }
   text-transform: uppercase;
   letter-spacing: 0.14em;
   margin-bottom: 9px;
+  transform: skewX(-6deg);
+  transform-origin: left center;
 }
 
 .unpaired-label.exp   { color: var(--exp); }
@@ -677,6 +686,9 @@ input[type="text"]::placeholder { color: var(--muted); }
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--inexp);
+  /* Slash on modal headers. inline-block enables the transform. */
+  display: inline-block;
+  transform: skewX(-6deg);
 }
 
 .modal-hint {
@@ -987,6 +999,8 @@ html.splash-skip #splash { display: none; }
   color: #fffcef;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
   margin-top: 4px;
+  /* Smash-logo lean - matches the header H1 brand tier. */
+  transform: skewX(-10deg);
 }
 
 .splash-tagline {
