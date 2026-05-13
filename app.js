@@ -1,12 +1,18 @@
 // Capture the splash boot time as early as possible so we can honor a
 // minimum visible duration regardless of how fast state loads.
 const splashStartTime = Date.now();
-const SPLASH_MIN_MS   = 500;
+const SPLASH_MIN_MS   = 4000; // ~4s "boot screen" feel
 const SPLASH_FADE_MS  = 500;
+
+// True when the inline head script tagged this load as a repeat-in-session
+// (e.g. a service-worker controllerchange reload). The splash is already
+// hidden by CSS in that case so we only need to remove the stale element.
+const splashSkipped = document.documentElement.classList.contains('splash-skip');
 
 function hideSplash() {
   const splash = document.getElementById('splash');
   if (!splash) return;
+  if (splashSkipped) { splash.remove(); return; }
   splash.classList.add('hidden');
   // Remove from the DOM once the fade has finished so it stops capturing
   // taps and stops painting a full-bleed layer behind the app.
@@ -718,6 +724,10 @@ document.getElementById('inexp-input-r').addEventListener('keydown', e => {
   await loadState();
   loadPresetsFromStorage();
   render();
-  const wait = Math.max(0, SPLASH_MIN_MS - (Date.now() - splashStartTime));
-  setTimeout(hideSplash, wait);
+  if (splashSkipped) {
+    hideSplash(); // remove the hidden splash element from the DOM immediately
+  } else {
+    const wait = Math.max(0, SPLASH_MIN_MS - (Date.now() - splashStartTime));
+    setTimeout(hideSplash, wait);
+  }
 })();
