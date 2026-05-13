@@ -247,9 +247,23 @@ input[type="text"]::placeholder { color: var(--muted); }
   gap: 6px;
   background: var(--bg);
   border-radius: 5px;
-  padding: 6px 8px;
-  min-height: 32px;
+  padding: 7px 8px 7px 12px;
+  min-height: 34px;
   min-width: 0;
+  position: relative;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.fixed-pair-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background: var(--set);
 }
 
 .fixed-pair-row .name-edit { flex: 1 1 0; }
@@ -284,19 +298,42 @@ input[type="text"]::placeholder { color: var(--muted); }
 .name-list::-webkit-scrollbar-track { background: transparent; }
 .name-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
+/* Player rows are styled as name tags: 3px category-color bar on the left,
+   a faint top-edge highlight + slight bottom-edge shadow inset for the
+   "slightly raised card" feel, and medium-weight (500) text. The bar color
+   comes from --bar-color set per-panel below; .fixed-pair-row (set teams)
+   hardcodes gold via its own rule further down. */
 .name-tag {
   display: flex;
   align-items: center;
   justify-content: space-between;
   background: var(--bg);
   border-radius: 5px;
-  padding: 6px 8px;
-  min-height: 30px;
+  padding: 7px 8px 7px 12px;
+  min-height: 32px;
   min-width: 0;
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.78rem;
+  font-weight: 500;
   gap: 4px;
+  position: relative;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
 }
+
+.name-tag::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background: var(--bar-color, var(--border));
+}
+
+.exp-panel   .name-tag { --bar-color: var(--exp); }
+.inexp-panel .name-tag { --bar-color: var(--inexp); }
 
 .name-tag > span {
   flex: 1;
@@ -337,6 +374,7 @@ input[type="text"]::placeholder { color: var(--muted); }
   color: var(--text);
   font-family: 'IBM Plex Mono', monospace;
   font-size: 16px; /* prevents iOS auto-zoom on focus */
+  font-weight: 500; /* match the name-tag's bolder weight */
   outline: none;
   -webkit-appearance: none;
   appearance: none;
