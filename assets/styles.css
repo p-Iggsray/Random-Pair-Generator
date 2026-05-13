@@ -566,6 +566,27 @@ input[type="text"]::placeholder { color: var(--muted); }
 
 .team-name-input:focus { border-bottom-color: var(--text); border-bottom-style: solid; }
 
+/* While the team has no name and the user is not actively editing the input,
+   pulse the dashed underline in gold so it visibly invites a tap. The
+   :placeholder-shown:not(:focus) compound matches "input is empty AND not
+   being edited", so the animation stops the moment the user taps in OR
+   types a character. */
+.team-name-input:placeholder-shown:not(:focus) {
+  animation: team-name-hint 1.8s ease-in-out infinite;
+}
+
+@keyframes team-name-hint {
+  0%, 100% { border-bottom-color: rgba(255, 201, 77, 0.25); }
+  50%      { border-bottom-color: rgba(255, 201, 77, 0.9); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .team-name-input:placeholder-shown:not(:focus) {
+    animation: none;
+    border-bottom-color: rgba(255, 201, 77, 0.55);
+  }
+}
+
 .team-member {
   display: flex;
   align-items: center;
