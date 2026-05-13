@@ -501,12 +501,33 @@ input[type="text"]::placeholder { color: var(--muted); }
 
 .team-card.fixed .team-num { color: var(--set); }
 
+/* Big stencil-style team number. Chunky Barlow Condensed 800 in dim grey
+   (or gold on fixed cards), skewed -10deg to match the brand-tier headers
+   from PR #25, with a horizontal stencil cut drawn by a ::after pseudo
+   filled in the card's own background color. */
 .team-num {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.72rem;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 800;
   color: var(--dim);
-  min-width: 22px;
-  padding-top: 3px;
+  min-width: 50px;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  align-self: center;
+  position: relative;
+  transform: skewX(-10deg);
+  transform-origin: center;
+}
+
+.team-num::after {
+  content: '';
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  top: calc(50% - 1.5px);
+  height: 3px;
+  background: var(--surface);
+  pointer-events: none;
 }
 
 .team-body {
