@@ -1,3 +1,18 @@
+// Capture the splash boot time as early as possible so we can honor a
+// minimum visible duration regardless of how fast state loads.
+const splashStartTime = Date.now();
+const SPLASH_MIN_MS   = 500;
+const SPLASH_FADE_MS  = 500;
+
+function hideSplash() {
+  const splash = document.getElementById('splash');
+  if (!splash) return;
+  splash.classList.add('hidden');
+  // Remove from the DOM once the fade has finished so it stops capturing
+  // taps and stops painting a full-bleed layer behind the app.
+  setTimeout(() => splash.remove(), SPLASH_FADE_MS + 100);
+}
+
 // Register a network-first service worker so the home-screen PWA
 // picks up new deploys automatically instead of running cached files.
 if ('serviceWorker' in navigator) {
@@ -699,4 +714,10 @@ document.getElementById('inexp-input-r').addEventListener('keydown', e => {
   if (e.key === 'Enter') addPlayer('inexp', 'inexp-input-r');
 });
 
-(async () => { await loadState(); loadPresetsFromStorage(); render(); })();
+(async () => {
+  await loadState();
+  loadPresetsFromStorage();
+  render();
+  const wait = Math.max(0, SPLASH_MIN_MS - (Date.now() - splashStartTime));
+  setTimeout(hideSplash, wait);
+})();
