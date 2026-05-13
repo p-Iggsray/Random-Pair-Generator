@@ -3,16 +3,16 @@
 // offline fallback. This guarantees the PWA on the home screen always
 // serves the latest deploy when there is connectivity.
 
-const CACHE = 'rpg-runtime-v16';
+const CACHE = 'rpg-runtime-v17';
 const PRECACHE = [
   './',
   './index.html',
-  './theme.css',
-  './styles.css',
-  './app.js',
-  './icon.svg',
-  './stage-bg.svg',
-  './manifest.webmanifest'
+  './manifest.webmanifest',
+  './assets/theme.css',
+  './assets/styles.css',
+  './assets/app.js',
+  './assets/icon.svg',
+  './assets/stage-bg.svg'
 ];
 
 self.addEventListener('install', event => {
