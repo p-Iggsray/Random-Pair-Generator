@@ -17,8 +17,8 @@
   <link rel="icon" type="image/svg+xml" href="assets/icon.svg?v=4">
   <link rel="manifest" href="manifest.webmanifest?v=4">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/theme.css?v=28">
-  <link rel="stylesheet" href="assets/styles.css?v=28">
+  <link rel="stylesheet" href="assets/theme.css?v=29">
+  <link rel="stylesheet" href="assets/styles.css?v=29">
   <script>
     // Show the splash at most once per browsing session. A service-worker
     // update-then-reload would otherwise replay the splash a second time
@@ -103,6 +103,10 @@
 <div id="home">
 
 <div class="home-actions">
+  <div class="mode-toggle" role="radiogroup" aria-label="Pairing mode">
+    <button class="mode-btn" id="mode-full"  onclick="setMode('full')"  role="radio">Full 2v2</button>
+    <button class="mode-btn" id="mode-split" onclick="setMode('split')" role="radio">Split 2v2</button>
+  </div>
   <button class="btn-presets" onclick="openPresets()">
     <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" aria-hidden="true">
       <path d="M4 1.5h8a1.5 1.5 0 0 1 1.5 1.5v11.5l-5.5-3-5.5 3V3A1.5 1.5 0 0 1 4 1.5z"/>
@@ -269,7 +273,7 @@
   </div>
 </div>
 
-<script src="assets/app.js?v=28"></script>
+<script src="assets/app.js?v=29"></script>
 
 </body>
 </html>
