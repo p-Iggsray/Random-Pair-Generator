@@ -17,8 +17,8 @@
   <link rel="icon" type="image/svg+xml" href="assets/icon.svg?v=4">
   <link rel="manifest" href="manifest.webmanifest?v=4">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/theme.css?v=34">
-  <link rel="stylesheet" href="assets/styles.css?v=34">
+  <link rel="stylesheet" href="assets/theme.css?v=35">
+  <link rel="stylesheet" href="assets/styles.css?v=35">
   <script>
     // Show the splash at most once per browsing session. A service-worker
     // update-then-reload would otherwise replay the splash a second time
@@ -310,13 +310,20 @@
     </div>
     <textarea class="export-textarea" id="export-text" readonly spellcheck="false"></textarea>
     <div class="modal-actions">
+      <button class="btn-share" id="btn-share" onclick="shareExport()" hidden>Share…</button>
       <button class="btn-copy" id="btn-copy" onclick="copyExport()">Copy All</button>
       <button class="btn-close-modal" onclick="hideExport()">Close</button>
     </div>
   </div>
 </div>
 
-<script src="assets/app.js?v=34"></script>
+<!-- Toast (single shared element; lives outside the modal so it survives hide) -->
+<div id="toast" class="toast" role="status" aria-live="polite" hidden onclick="hideToast()">
+  <span class="toast-icon" id="toast-icon" aria-hidden="true"></span>
+  <span class="toast-text" id="toast-text"></span>
+</div>
+
+<script src="assets/app.js?v=35"></script>
 
 </body>
 </html>

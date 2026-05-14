@@ -548,6 +548,57 @@ const HINT_ICON_HTML = `
     <circle cx="8" cy="4.5" r="0.85"/>
   </svg>`;
 
+// Toast icons (checkmark for success, warning triangle for error).
+const TOAST_CHECK_HTML = `
+  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M3 8.5 L6.5 12 L13 4.5"/>
+  </svg>`;
+
+const TOAST_WARN_HTML = `
+  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M8 2 L14.5 13.5 L1.5 13.5 Z"/>
+    <line x1="8" y1="6.5" x2="8" y2="10"/>
+    <circle cx="8" cy="12" r="0.5" fill="currentColor"/>
+  </svg>`;
+
+let _toastTimer = null;
+
+// Reusable toast. Replace semantics: latest call wins, timer resets. Tap toast
+// to dismiss early. Lives outside any modal so it survives modal hide.
+function showToast(message, options = {}) {
+  const { variant = 'success', duration = 2500 } = options;
+  const toast  = document.getElementById('toast');
+  const iconEl = document.getElementById('toast-icon');
+  const textEl = document.getElementById('toast-text');
+
+  if (_toastTimer) clearTimeout(_toastTimer);
+
+  textEl.textContent = message;
+  toast.classList.remove('success', 'error');
+  toast.classList.add(variant);
+  iconEl.innerHTML = variant === 'error' ? TOAST_WARN_HTML : TOAST_CHECK_HTML;
+
+  toast.hidden = false;
+  // Force reflow so the .show transition animates from the just-unhidden state.
+  void toast.offsetWidth;
+  toast.classList.add('show');
+
+  _toastTimer = setTimeout(hideToast, duration);
+}
+
+function hideToast() {
+  if (_toastTimer) {
+    clearTimeout(_toastTimer);
+    _toastTimer = null;
+  }
+  const toast = document.getElementById('toast');
+  toast.classList.remove('show');
+  // Hide after the fade-out completes so the element doesn't intercept taps.
+  setTimeout(() => {
+    if (!toast.classList.contains('show')) toast.hidden = true;
+  }, 220);
+}
+
 // Build the Pair Waiting button label. Returns null when there's nothing to
 // pair (button gets hidden by the caller).
 function pairWaitingLabel(mode, uExp, uInexp) {
@@ -914,9 +965,6 @@ function addBulkPlayers() {
 function showExport() {
   document.getElementById('export-text').value = buildExportText();
   document.getElementById('export-modal').classList.add('open');
-  const btn = document.getElementById('btn-copy');
-  btn.textContent = 'Copy All';
-  btn.classList.remove('copied');
 }
 
 function hideExport() {
@@ -929,26 +977,30 @@ function handleBackdropClick(e) {
 
 function copyExport() {
   const text = document.getElementById('export-text').value;
-  const btn  = document.getElementById('btn-copy');
-  navigator.clipboard.writeText(text).then(() => {
-    btn.textContent = 'Copied!';
-    btn.classList.add('copied');
-    setTimeout(() => {
-      btn.textContent = 'Copy All';
-      btn.classList.remove('copied');
-    }, 2000);
-  }).catch(() => {
-    // Fallback for clipboard API failures
-    const ta = document.getElementById('export-text');
-    ta.select();
-    document.execCommand('copy');
-    btn.textContent = 'Copied!';
-    btn.classList.add('copied');
-    setTimeout(() => {
-      btn.textContent = 'Copy All';
-      btn.classList.remove('copied');
-    }, 2000);
-  });
+  navigator.clipboard.writeText(text)
+    .then(() => showToast('Copied to clipboard'))
+    .catch(() => {
+      // Older WebView fallback - still routes through the toast so the user
+      // gets the same feedback either way.
+      const ta = document.getElementById('export-text');
+      ta.select();
+      let ok = false;
+      try { ok = document.execCommand('copy'); } catch { ok = false; }
+      if (ok) showToast('Copied to clipboard');
+      else    showToast('Copy failed', { variant: 'error' });
+    });
+}
+
+async function shareExport() {
+  try {
+    await navigator.share({
+      title: 'Smash Pairing teams',
+      text:  buildExportText(),
+    });
+    hideExport();  // auto-close only on successful share
+  } catch (e) {
+    // Silent: AbortError on user cancel is normal; other errors aren't actionable.
+  }
 }
 
 document.getElementById('exp-input').addEventListener('keydown', e => {
@@ -963,6 +1015,13 @@ document.getElementById('exp-input-r').addEventListener('keydown', e => {
 document.getElementById('inexp-input-r').addEventListener('keydown', e => {
   if (e.key === 'Enter') addPlayer('inexp', 'inexp-input-r');
 });
+
+// Feature-detect Web Share. Button is hidden in HTML by default; reveal it
+// once on load if navigator.share exists, so the modal renders correctly
+// before showExport() is ever called.
+if ('share' in navigator) {
+  document.getElementById('btn-share').hidden = false;
+}
 
 (async () => {
   await loadState();

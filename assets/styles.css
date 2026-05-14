@@ -1234,7 +1234,6 @@ input[type="text"]::placeholder { color: var(--muted); }
 }
 
 .btn-copy:active { opacity: 0.75; }
-.btn-copy.copied { background: #122a14; color: #22c55e; border-color: #166534; }
 
 .btn-close-modal {
   padding: 15px 20px;
@@ -1251,6 +1250,80 @@ input[type="text"]::placeholder { color: var(--muted); }
 }
 
 .btn-close-modal:active { background: var(--surface); }
+
+/* Share - tertiary, matches Close visually. Hidden by default; revealed by JS
+   when navigator.share is available. white-space:nowrap keeps the ellipsis
+   from wrapping when all 3 buttons share a tight row. */
+.btn-share {
+  padding: 15px 16px;
+  background: transparent;
+  color: var(--dim);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-share:active { background: var(--surface); }
+
+/* Toast - single shared pill pinned top-center, z above modal (modal is z:100).
+   Lives outside the modal in the DOM so it persists across modal hide. Tap to
+   dismiss early. Variants tint border + bg + color. */
+.toast {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + 16px);
+  left: 50%;
+  transform: translate(-50%, -16px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 18px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--dim);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease, transform 180ms ease;
+  cursor: pointer;
+  max-width: calc(100vw - 32px);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+
+.toast.success {
+  color: #22c55e;
+  border-color: #166534;
+  background: #0a1d12;
+}
+
+.toast.error {
+  color: #ef4444;
+  border-color: #7f1d1d;
+  background: #2a0a0a;
+}
+
+.toast-icon {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
 
 #save-dot {
   position: fixed;
