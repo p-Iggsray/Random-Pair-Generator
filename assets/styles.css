@@ -833,12 +833,35 @@ input[type="text"]::placeholder { color: var(--muted); }
 .btn-back:active { background: var(--surface); }
 
 .btn-back.armed {
+  position: relative;
+  overflow: hidden;
   background: rgba(239, 68, 68, 0.12);
   border-color: rgba(239, 68, 68, 0.55);
-  color: #ef4444;
+  color: var(--danger);
 }
 
 .btn-back.armed:active { background: rgba(239, 68, 68, 0.22); }
+
+/* Hairline countdown bar that depletes left-to-right during the 3s arm
+   window. Bound to .armed so it mounts/unmounts with the JS timer
+   (app.js:402-430) automatically - no extra wiring needed. */
+.btn-back.armed::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--danger);
+  transform-origin: left;
+  animation: reset-timer 3s linear forwards;
+}
+
+@keyframes reset-timer { to { transform: scaleX(0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-back.armed::after { display: none; }
+}
 
 .btn-pair-unpaired {
   width: 100%;
