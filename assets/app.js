@@ -44,9 +44,10 @@ if (navigator.storage && navigator.storage.persist) {
 const state = {
   exp:        [],
   inexp:      [],
-  fixedPairs: [],  // [{ id, aName, bName, name? }] — set teams entered by hand
-  pairs:      [],  // [{ expId, inexpId, name? }] — random pairs from Generate
+  fixedPairs: [],     // [{ id, aName, bName, name? }] — set teams entered by hand
+  pairs:      [],     // [{ aId, bId, kind: 'mixed'|'exp'|'inexp', name? }]
   hasPaired:  false,
+  mode:       'full', // 'full' = exp+inexp pairs; 'split' = exp+exp and inexp+inexp pairs
   uid:        0
 };
 
@@ -74,6 +75,17 @@ async function loadState() {
     if (raw) Object.assign(state, JSON.parse(raw));
   } catch(e) {}
   if (!Array.isArray(state.fixedPairs)) state.fixedPairs = [];
+  if (state.mode !== 'split') state.mode = 'full';
+  // Migrate legacy random pairs ({ expId, inexpId } -> { aId, bId, kind: 'mixed' }).
+  if (Array.isArray(state.pairs)) {
+    state.pairs = state.pairs.map(p => {
+      if (p && p.kind) return p;
+      if (p && p.expId !== undefined && p.inexpId !== undefined) {
+        return { aId: p.expId, bId: p.inexpId, kind: 'mixed', name: p.name };
+      }
+      return p;
+    });
+  }
 }
 
 function savePresets() {
@@ -117,12 +129,20 @@ function shuffle(arr) {
 }
 
 function unpairedExp() {
-  const used = new Set(state.pairs.map(p => p.expId));
+  const used = new Set();
+  state.pairs.forEach(p => {
+    if (p.kind === 'mixed') used.add(p.aId);          // aId is the exp slot in mixed pairs
+    else if (p.kind === 'exp') { used.add(p.aId); used.add(p.bId); }
+  });
   return state.exp.filter(p => !used.has(p.id));
 }
 
 function unpairedInexp() {
-  const used = new Set(state.pairs.map(p => p.inexpId));
+  const used = new Set();
+  state.pairs.forEach(p => {
+    if (p.kind === 'mixed') used.add(p.bId);          // bId is the inexp slot in mixed pairs
+    else if (p.kind === 'inexp') { used.add(p.aId); used.add(p.bId); }
+  });
   return state.inexp.filter(p => !used.has(p.id));
 }
 
@@ -141,13 +161,30 @@ function addPlayer(type, inputId) {
 
 function pairUnpaired() {
   if (!state.hasPaired) return;
-  const sExp   = shuffle(unpairedExp());
-  const sInexp = shuffle(unpairedInexp());
-  const count  = Math.min(sExp.length, sInexp.length);
-  if (!count) return;
-  for (let i = 0; i < count; i++) {
-    state.pairs.push({ expId: sExp[i].id, inexpId: sInexp[i].id });
+  let added = 0;
+
+  if (state.mode === 'split') {
+    const sExp = shuffle(unpairedExp());
+    for (let i = 0; i + 1 < sExp.length; i += 2) {
+      state.pairs.push({ aId: sExp[i].id, bId: sExp[i + 1].id, kind: 'exp' });
+      added++;
+    }
+    const sInexp = shuffle(unpairedInexp());
+    for (let i = 0; i + 1 < sInexp.length; i += 2) {
+      state.pairs.push({ aId: sInexp[i].id, bId: sInexp[i + 1].id, kind: 'inexp' });
+      added++;
+    }
+  } else {
+    const sExp   = shuffle(unpairedExp());
+    const sInexp = shuffle(unpairedInexp());
+    const count  = Math.min(sExp.length, sInexp.length);
+    for (let i = 0; i < count; i++) {
+      state.pairs.push({ aId: sExp[i].id, bId: sInexp[i].id, kind: 'mixed' });
+      added++;
+    }
   }
+
+  if (!added) return;
   swapSelection = null;
   saveState();
   render();
@@ -221,53 +258,92 @@ function renamePlayer(type, id, value) {
 }
 
 // Tap a player on the Results screen to start a swap, then tap another player
-// of the same category on a different team to complete the swap. Tapping the
-// same player cancels. Cross-category taps move the selection to the new player.
-function selectForSwap(type, pairIdx, playerId) {
+// of the same category AND in a pair of the same kind to complete the swap.
+// Tapping the same player cancels. Tapping a player from an incompatible pair
+// (different category or different pair kind, e.g. mixed vs exp-only) moves
+// the selection to the new player instead of swapping.
+function selectForSwap(category, pairIdx, playerId) {
   if (!state.hasPaired) return;
+  const pair = state.pairs[pairIdx];
+  if (!pair) return;
   const sel = swapSelection;
 
-  if (sel && sel.type === type && sel.playerId === playerId) {
+  if (sel && sel.playerId === playerId) {
     swapSelection = null;
     renderResults();
     return;
   }
 
-  if (!sel || sel.type !== type) {
-    swapSelection = { type, pairIdx, playerId };
+  if (!sel || sel.category !== category || sel.pairKind !== pair.kind) {
+    swapSelection = { category, pairKind: pair.kind, pairIdx, playerId };
     renderResults();
     return;
   }
 
-  const a = state.pairs[sel.pairIdx];
-  const b = state.pairs[pairIdx];
-  if (!a || !b || sel.pairIdx === pairIdx) {
+  const other = state.pairs[sel.pairIdx];
+  if (!other || sel.pairIdx === pairIdx) {
     swapSelection = null;
     renderResults();
     return;
   }
-  const key = type === 'exp' ? 'expId' : 'inexpId';
-  const tmp = a[key];
-  a[key]   = b[key];
-  b[key]   = tmp;
+  // Find which slot (aId / bId) holds each player, then exchange those slots.
+  const selSlot    = other.aId === sel.playerId ? 'aId' : 'bId';
+  const targetSlot = pair.aId  === playerId      ? 'aId' : 'bId';
+  const tmp = other[selSlot];
+  other[selSlot] = pair[targetSlot];
+  pair[targetSlot] = tmp;
+
   swapSelection = null;
   saveState();
   renderResults();
 }
 
+function setMode(mode) {
+  if (mode !== 'full' && mode !== 'split') return;
+  if (state.mode === mode) return;
+  if (state.hasPaired) return; // mode toggle is hidden while paired anyway
+  state.mode = mode;
+  saveState();
+  renderModeToggle();
+  renderGenBtn();
+}
+
 function generatePairs() {
   if (state.hasPaired) return;
-  const hasFixed  = state.fixedPairs.length > 0;
-  const hasRandom = state.exp.length > 0 && state.inexp.length > 0;
-  if (!hasFixed && !hasRandom) return;
-  if (hasRandom) {
-    const sExp   = shuffle(state.exp);
-    const sInexp = shuffle(state.inexp);
-    const count  = Math.min(sExp.length, sInexp.length);
-    state.pairs  = Array.from({ length: count }, (_, i) => ({ expId: sExp[i].id, inexpId: sInexp[i].id }));
+  const hasFixed = state.fixedPairs.length > 0;
+  const pairs    = [];
+
+  if (state.mode === 'split') {
+    // Pair experienced with experienced and inexperienced with inexperienced
+    // separately. Odd counts leave a leftover in the matching unpaired bucket.
+    if (state.exp.length >= 2) {
+      const sExp = shuffle(state.exp);
+      for (let i = 0; i + 1 < sExp.length; i += 2) {
+        pairs.push({ aId: sExp[i].id, bId: sExp[i + 1].id, kind: 'exp' });
+      }
+    }
+    if (state.inexp.length >= 2) {
+      const sInexp = shuffle(state.inexp);
+      for (let i = 0; i + 1 < sInexp.length; i += 2) {
+        pairs.push({ aId: sInexp[i].id, bId: sInexp[i + 1].id, kind: 'inexp' });
+      }
+    }
+    if (!hasFixed && pairs.length === 0) return;
   } else {
-    state.pairs  = [];
+    // Full 2v2: pair experienced with inexperienced across categories.
+    const hasRandom = state.exp.length > 0 && state.inexp.length > 0;
+    if (!hasFixed && !hasRandom) return;
+    if (hasRandom) {
+      const sExp   = shuffle(state.exp);
+      const sInexp = shuffle(state.inexp);
+      const count  = Math.min(sExp.length, sInexp.length);
+      for (let i = 0; i < count; i++) {
+        pairs.push({ aId: sExp[i].id, bId: sInexp[i].id, kind: 'mixed' });
+      }
+    }
   }
+
+  state.pairs     = pairs;
   state.hasPaired = true;
   saveState();
   render();
@@ -336,6 +412,7 @@ function resetTeams() {
 
 function render() {
   document.getElementById('home').style.display = state.hasPaired ? 'none' : 'block';
+  renderModeToggle();
   renderPanel('exp');
   renderPanel('inexp');
   renderFixedList();
@@ -390,12 +467,27 @@ function renderPanel(type) {
 }
 
 function renderGenBtn() {
-  const btn       = document.getElementById('btn-generate');
-  const hasFixed  = state.fixedPairs.length > 0;
-  const hasRandom = state.exp.length > 0 && state.inexp.length > 0;
+  const btn      = document.getElementById('btn-generate');
+  const hasFixed = state.fixedPairs.length > 0;
+  let hasRandom;
+  if (state.mode === 'split') {
+    hasRandom = state.exp.length >= 2 || state.inexp.length >= 2;
+  } else {
+    hasRandom = state.exp.length > 0 && state.inexp.length > 0;
+  }
   const ready     = hasFixed || hasRandom;
   btn.className   = ready ? 'btn-generate active' : 'btn-generate';
   btn.textContent = 'Generate Teams';
+}
+
+function renderModeToggle() {
+  const fullBtn  = document.getElementById('mode-full');
+  const splitBtn = document.getElementById('mode-split');
+  if (!fullBtn || !splitBtn) return;
+  fullBtn.classList.toggle('active',  state.mode === 'full');
+  splitBtn.classList.toggle('active', state.mode === 'split');
+  fullBtn.setAttribute('aria-checked',  state.mode === 'full'  ? 'true' : 'false');
+  splitBtn.setAttribute('aria-checked', state.mode === 'split' ? 'true' : 'false');
 }
 
 function renderResults() {
@@ -441,15 +533,24 @@ function renderResults() {
   });
 
   state.pairs.forEach((pair, i) => {
-    const e = expById[pair.expId];
-    const n = inexpById[pair.inexpId];
-    if (!e || !n) return;
+    let aPlayer, bPlayer, aClass, bClass;
+    if (pair.kind === 'exp') {
+      aPlayer = expById[pair.aId]; bPlayer = expById[pair.bId];
+      aClass = bClass = 'exp';
+    } else if (pair.kind === 'inexp') {
+      aPlayer = inexpById[pair.aId]; bPlayer = inexpById[pair.bId];
+      aClass = bClass = 'inexp';
+    } else { // 'mixed'
+      aPlayer = expById[pair.aId]; bPlayer = inexpById[pair.bId];
+      aClass = 'exp'; bClass = 'inexp';
+    }
+    if (!aPlayer || !bPlayer) return;
     teamNum++;
     const num  = String(teamNum).padStart(2, '0');
     const nm   = pair.name ? esc(pair.name) : '';
     const sel  = swapSelection;
-    const eSel = sel && sel.type === 'exp'   && sel.pairIdx === i ? ' selected' : '';
-    const nSel = sel && sel.type === 'inexp' && sel.pairIdx === i ? ' selected' : '';
+    const aSel = sel && sel.playerId === pair.aId ? ' selected' : '';
+    const bSel = sel && sel.playerId === pair.bId ? ' selected' : '';
     cards.push(`
       <div class="team-card">
         <span class="team-num">${num}</span>
@@ -464,14 +565,14 @@ function renderResults() {
             autocorrect="off"
             spellcheck="false"
             onchange="setTeamName(${i}, this.value)">
-          <div class="team-member exp${eSel}" onclick="selectForSwap('exp', ${i}, ${e.id})">
-            <span class="member-dot exp"></span>
-            <span class="member-name exp">${esc(e.name)}</span>
+          <div class="team-member ${aClass}${aSel}" onclick="selectForSwap('${aClass}', ${i}, ${aPlayer.id})">
+            <span class="member-dot ${aClass}"></span>
+            <span class="member-name ${aClass}">${esc(aPlayer.name)}</span>
           </div>
           <hr class="team-hr">
-          <div class="team-member inexp${nSel}" onclick="selectForSwap('inexp', ${i}, ${n.id})">
-            <span class="member-dot inexp"></span>
-            <span class="member-name inexp">${esc(n.name)}</span>
+          <div class="team-member ${bClass}${bSel}" onclick="selectForSwap('${bClass}', ${i}, ${bPlayer.id})">
+            <span class="member-dot ${bClass}"></span>
+            <span class="member-name ${bClass}">${esc(bPlayer.name)}</span>
           </div>
         </div>
       </div>`);
@@ -483,9 +584,9 @@ function renderResults() {
 
   const hint = document.getElementById('swap-hint');
   if (swapSelection) {
-    const cat = swapSelection.type === 'exp' ? 'experienced' : 'inexperienced';
+    const cat = swapSelection.category === 'exp' ? 'experienced' : 'inexperienced';
     hint.textContent = `Tap another ${cat} player to swap, or tap the same one to cancel.`;
-    hint.className   = `swap-hint show ${swapSelection.type}`;
+    hint.className   = `swap-hint show ${swapSelection.category}`;
   } else {
     hint.className   = 'swap-hint';
     hint.textContent = '';
@@ -511,10 +612,15 @@ function renderResults() {
     uInexpBlock.style.display = 'none';
   }
 
-  const canPair = uExp.length > 0 && uInexp.length > 0;
   const pairBtn = document.getElementById('btn-pair-unpaired');
-  pairBtn.style.display = canPair ? 'block' : 'none';
-  pairBtn.textContent   = `Pair ${Math.min(uExp.length, uInexp.length)} Waiting`;
+  let pairCount;
+  if (state.mode === 'split') {
+    pairCount = Math.floor(uExp.length / 2) + Math.floor(uInexp.length / 2);
+  } else {
+    pairCount = Math.min(uExp.length, uInexp.length);
+  }
+  pairBtn.style.display = pairCount > 0 ? 'block' : 'none';
+  pairBtn.textContent   = `Pair ${pairCount} Waiting`;
 }
 
 // ---- Challonge export ----
@@ -530,9 +636,11 @@ function buildExportText() {
   });
 
   state.pairs.forEach(pair => {
-    const e = expById[pair.expId];
-    const n = inexpById[pair.inexpId];
-    if (e && n) lines.push(pair.name || `${e.name} & ${n.name}`);
+    let a, b;
+    if (pair.kind === 'exp')        { a = expById[pair.aId];   b = expById[pair.bId];   }
+    else if (pair.kind === 'inexp') { a = inexpById[pair.aId]; b = inexpById[pair.bId]; }
+    else                            { a = expById[pair.aId];   b = inexpById[pair.bId]; }
+    if (a && b) lines.push(pair.name || `${a.name} & ${b.name}`);
   });
 
   const uExp   = unpairedExp();
