@@ -301,10 +301,10 @@ function selectForSwap(category, pairIdx, playerId) {
 function setMode(mode) {
   if (mode !== 'full' && mode !== 'split') return;
   if (state.mode === mode) return;
-  if (state.hasPaired) return; // mode toggle is hidden while paired anyway
+  if (state.hasPaired) return; // menu button is hidden while paired anyway
   state.mode = mode;
   saveState();
-  renderModeToggle();
+  renderMenu();
   renderGenBtn();
 }
 
@@ -411,8 +411,9 @@ function resetTeams() {
 // ---- render ----
 
 function render() {
-  document.getElementById('home').style.display = state.hasPaired ? 'none' : 'block';
-  renderModeToggle();
+  document.getElementById('home').style.display     = state.hasPaired ? 'none' : 'block';
+  document.getElementById('menu-btn').style.display = state.hasPaired ? 'none' : 'flex';
+  renderMenu();
   renderPanel('exp');
   renderPanel('inexp');
   renderFixedList();
@@ -480,14 +481,33 @@ function renderGenBtn() {
   btn.textContent = 'Generate Teams';
 }
 
-function renderModeToggle() {
-  const fullBtn  = document.getElementById('mode-full');
-  const splitBtn = document.getElementById('mode-split');
+function renderMenu() {
+  const fullBtn  = document.getElementById('menu-mode-full');
+  const splitBtn = document.getElementById('menu-mode-split');
   if (!fullBtn || !splitBtn) return;
   fullBtn.classList.toggle('active',  state.mode === 'full');
   splitBtn.classList.toggle('active', state.mode === 'split');
-  fullBtn.setAttribute('aria-checked',  state.mode === 'full'  ? 'true' : 'false');
-  splitBtn.setAttribute('aria-checked', state.mode === 'split' ? 'true' : 'false');
+}
+
+function openMenu() {
+  if (state.hasPaired) return; // safety: menu-btn is hidden in this state anyway
+  renderMenu();
+  document.getElementById('menu-modal').classList.add('open');
+}
+
+function hideMenu() {
+  document.getElementById('menu-modal').classList.remove('open');
+}
+
+function handleMenuBackdropClick(e) {
+  if (e.target === document.getElementById('menu-modal')) hideMenu();
+}
+
+// Wrapper used by the menu option buttons so picking a mode auto-closes
+// the sheet, matching the mobile "tap to choose" pattern.
+function selectMode(mode) {
+  setMode(mode);
+  hideMenu();
 }
 
 function renderResults() {
