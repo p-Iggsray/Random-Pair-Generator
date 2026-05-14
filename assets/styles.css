@@ -918,12 +918,29 @@ input[type="text"]::placeholder { color: var(--muted); }
   justify-content: space-between;
 }
 
+/* Role-based accent variants on modal-sheet. The cascade sets CSS custom
+   properties consumed by .modal-title and the primary buttons. is-input and
+   is-list resolve to the same colors today but stay semantically distinct so
+   future styling can diverge without renaming HTML. */
+.modal-sheet.is-input,
+.modal-sheet.is-list {
+  --modal-accent:        var(--exp);
+  --modal-accent-grad:   var(--exp-grad);
+  --modal-accent-border: var(--exp-border);
+}
+
+.modal-sheet.is-outbound {
+  --modal-accent:        var(--inexp);
+  --modal-accent-grad:   var(--inexp-grad);
+  --modal-accent-border: var(--inexp-border);
+}
+
 .modal-title {
   font-size: 1.05rem;
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--inexp);
+  color: var(--modal-accent, var(--text));
   /* Slash on modal headers. inline-block enables the transform. */
   display: inline-block;
   transform: skewX(-6deg);
@@ -958,14 +975,12 @@ input[type="text"]::placeholder { color: var(--muted); }
 .bulk-textarea:focus { border-color: #4f6ef7; }
 .bulk-textarea::placeholder { color: var(--muted); }
 
-#bulk-modal .modal-title { color: var(--exp); }
-
 .btn-bulk-add {
   flex: 1;
   padding: 15px;
-  background: linear-gradient(120deg, #1a2e5c 0%, #1e1040 100%);
+  background: var(--modal-accent-grad);
   color: var(--text);
-  border: 1px solid #2a4080;
+  border: 1px solid var(--modal-accent-border);
   border-radius: 9px;
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 1.05rem;
@@ -1087,8 +1102,6 @@ input[type="text"]::placeholder { color: var(--muted); }
 
 .btn-presets svg { color: var(--exp); }
 
-#presets-modal .modal-title { color: var(--exp); }
-
 .preset-list {
   display: flex;
   flex-direction: column;
@@ -1200,9 +1213,9 @@ input[type="text"]::placeholder { color: var(--muted); }
   flex-shrink: 0;
   padding: 0 16px;
   min-height: 38px;
-  background: linear-gradient(120deg, #1a3a20 0%, #112a1a 100%);
-  color: var(--inexp);
-  border: 1px solid #1e4a28;
+  background: var(--modal-accent-grad);
+  color: var(--modal-accent);
+  border: 1px solid var(--modal-accent-border);
   border-radius: 6px;
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 0.85rem;
@@ -1221,9 +1234,9 @@ input[type="text"]::placeholder { color: var(--muted); }
 .btn-copy {
   flex: 1;
   padding: 15px;
-  background: linear-gradient(120deg, #1a3a20 0%, #112a1a 100%);
-  color: var(--inexp);
-  border: 1px solid #1e4a28;
+  background: var(--modal-accent-grad);
+  color: var(--modal-accent);
+  border: 1px solid var(--modal-accent-border);
   border-radius: 9px;
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 1.05rem;
