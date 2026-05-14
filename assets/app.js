@@ -48,6 +48,7 @@ const state = {
   pairs:      [],     // [{ aId, bId, kind: 'mixed'|'exp'|'inexp', name? }]
   hasPaired:  false,
   mode:       'full', // 'full' = exp+inexp pairs; 'split' = exp+exp and inexp+inexp pairs
+  setTeamsExpanded: null, // null = use heuristic (expand if has pairs); true/false = user override
   uid:        0
 };
 
@@ -308,6 +309,23 @@ function setMode(mode) {
   renderGenBtn();
 }
 
+// Resolve the Set Teams panel's expanded state.
+// Once the user explicitly toggles, that choice persists forever.
+// Until then, the panel expands by default if pairs already exist (the user
+// has invested in the feature) and collapses by default if empty.
+function isSetTeamsExpanded() {
+  if (state.setTeamsExpanded === true || state.setTeamsExpanded === false) {
+    return state.setTeamsExpanded;
+  }
+  return state.fixedPairs.length > 0;
+}
+
+function toggleSetTeams() {
+  state.setTeamsExpanded = !isSetTeamsExpanded();
+  saveState();
+  renderSetTeamsHeader();
+}
+
 function generatePairs() {
   if (state.hasPaired) return;
   const hasFixed = state.fixedPairs.length > 0;
@@ -421,8 +439,20 @@ function render() {
   renderResults();
 }
 
+function renderSetTeamsHeader() {
+  const panel  = document.getElementById('set-teams-panel');
+  const toggle = document.getElementById('set-teams-toggle');
+  if (!panel || !toggle) return;
+  const expanded = isSetTeamsExpanded();
+  const hasPairs = state.fixedPairs.length > 0;
+  panel.classList.toggle('collapsed', !expanded);
+  panel.classList.toggle('has-pairs', hasPairs);
+  toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+}
+
 function renderFixedList() {
   document.getElementById('fixed-count').textContent = state.fixedPairs.length;
+  renderSetTeamsHeader();
   const list = document.getElementById('fixed-list');
   if (!state.fixedPairs.length) {
     list.innerHTML = '<div class="list-empty">Empty</div>';
