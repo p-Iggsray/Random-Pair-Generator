@@ -1405,20 +1405,6 @@ input[type="text"]::placeholder { color: var(--muted); }
   flex-shrink: 0;
 }
 
-#save-dot {
-  position: fixed;
-  top: calc(env(safe-area-inset-top) + 14px);
-  right: calc(env(safe-area-inset-right) + 16px);
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--inexp);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-#save-dot.flash { opacity: 1; }
-
 /* One-shot confetti burst on Generate. Container is added to <body> by
    fireConfetti() and removed ~2.5s later. Each .confetti-piece reads its
    color/position/drift/rotation/size/timing from CSS custom properties set
