@@ -17,8 +17,8 @@
   <link rel="icon" type="image/svg+xml" href="assets/icon.svg?v=4">
   <link rel="manifest" href="manifest.webmanifest?v=4">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/theme.css?v=29">
-  <link rel="stylesheet" href="assets/styles.css?v=29">
+  <link rel="stylesheet" href="assets/theme.css?v=30">
+  <link rel="stylesheet" href="assets/styles.css?v=30">
   <script>
     // Show the splash at most once per browsing session. A service-worker
     // update-then-reload would otherwise replay the splash a second time
@@ -95,6 +95,14 @@
 
 <div id="save-dot"></div>
 
+<button id="menu-btn" class="menu-btn" aria-label="Open menu" onclick="openMenu()">
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+    <line x1="4" y1="7"  x2="20" y2="7"/>
+    <line x1="4" y1="12" x2="20" y2="12"/>
+    <line x1="4" y1="17" x2="20" y2="17"/>
+  </svg>
+</button>
+
 <header>
   <h1>Smash Pairing</h1>
   <p>Team assignment</p>
@@ -103,10 +111,6 @@
 <div id="home">
 
 <div class="home-actions">
-  <div class="mode-toggle" role="radiogroup" aria-label="Pairing mode">
-    <button class="mode-btn" id="mode-full"  onclick="setMode('full')"  role="radio">Full 2v2</button>
-    <button class="mode-btn" id="mode-split" onclick="setMode('split')" role="radio">Split 2v2</button>
-  </div>
   <button class="btn-presets" onclick="openPresets()">
     <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" aria-hidden="true">
       <path d="M4 1.5h8a1.5 1.5 0 0 1 1.5 1.5v11.5l-5.5-3-5.5 3V3A1.5 1.5 0 0 1 4 1.5z"/>
@@ -219,6 +223,30 @@
 
 </div>
 
+<!-- Menu (pairing mode) modal -->
+
+<div class="modal-backdrop" id="menu-modal" onclick="handleMenuBackdropClick(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">Pairing Mode</span>
+    </div>
+    <div class="menu-options">
+      <button class="menu-option" id="menu-mode-full" onclick="selectMode('full')">
+        <span class="menu-option-title">Full 2v2</span>
+        <span class="menu-option-desc">Experienced &amp; inexperienced pair across categories</span>
+      </button>
+      <button class="menu-option" id="menu-mode-split" onclick="selectMode('split')">
+        <span class="menu-option-title">Split 2v2</span>
+        <span class="menu-option-desc">Same-skill teams: exp + exp and inexp + inexp</span>
+      </button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-close-modal" onclick="hideMenu()">Done</button>
+    </div>
+  </div>
+</div>
+
 <!-- Roster presets modal -->
 
 <div class="modal-backdrop" id="presets-modal" onclick="handlePresetsBackdropClick(event)">
@@ -273,7 +301,7 @@
   </div>
 </div>
 
-<script src="assets/app.js?v=29"></script>
+<script src="assets/app.js?v=30"></script>
 
 </body>
 </html>
