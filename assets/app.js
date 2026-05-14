@@ -4,6 +4,8 @@ const splashStartTime = Date.now();
 const SPLASH_MIN_MS   = 4000; // ~4s "boot screen" feel
 const SPLASH_FADE_MS  = 500;
 
+const APP_VERSION = '0.1.0';
+
 // True when the inline head script tagged this load as a repeat-in-session
 // (e.g. a service-worker controllerchange reload). The splash is already
 // hidden by CSS in that case so we only need to remove the stale element.
@@ -536,6 +538,49 @@ function handleMenuBackdropClick(e) {
 function selectMode(mode) {
   setMode(mode);
   hideMenu();
+}
+
+function openAbout() {
+  hideMenu();
+  document.getElementById('about-version').textContent = APP_VERSION;
+  document.getElementById('about-modal').classList.add('open');
+}
+
+function hideAbout() {
+  document.getElementById('about-modal').classList.remove('open');
+}
+
+function handleAboutBackdropClick(e) {
+  if (e.target === document.getElementById('about-modal')) hideAbout();
+}
+
+function openHowToPlay() {
+  hideMenu();
+  document.getElementById('how-to-play-modal').classList.add('open');
+}
+
+function hideHowToPlay() {
+  document.getElementById('how-to-play-modal').classList.remove('open');
+}
+
+function handleHowToPlayBackdropClick(e) {
+  if (e.target === document.getElementById('how-to-play-modal')) hideHowToPlay();
+}
+
+async function confirmResetAll() {
+  hideMenu();
+  const ok = await showConfirm({
+    title: 'Reset all data?',
+    body: 'This permanently clears your roster, all presets, and any saved state. This cannot be undone.',
+    danger: true,
+    confirmLabel: 'Reset'
+  });
+  if (!ok) return;
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(PRESETS_KEY);
+  } catch (e) { /* if storage is unavailable, reload will still re-init defaults */ }
+  location.reload();
 }
 
 // Inline info-circle icon used in the leftover hints under each unpaired bucket.
