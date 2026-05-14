@@ -16,4 +16,8 @@
   --exp-border:   #2a4080;
   --inexp-grad:   linear-gradient(120deg, #1a3a20 0%, #112a1a 100%);
   --inexp-border: #1e4a28;
+
+  --danger:        #ef4444;
+  --danger-grad:   linear-gradient(120deg, #4a1a1a 0%, #2a0a0a 100%);
+  --danger-border: #7f1d1d;
 }

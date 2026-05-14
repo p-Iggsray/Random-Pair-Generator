@@ -59,6 +59,9 @@ const PRESETS_KEY = 'tp_presets';
 
 let presets = [];
 
+// Id of the preset row currently in inline-rename edit mode (null when none).
+let editingPresetId = null;
+
 // In-progress swap selection on the Results screen. Null when no player is selected.
 // Shape: { type: 'exp'|'inexp', pairIdx: number, playerId: number }
 let swapSelection = null;
@@ -599,6 +602,56 @@ function hideToast() {
   }, 220);
 }
 
+let _confirmResolver = null;
+
+// Promise-based confirm sheet. Resolves true on Confirm; false on Cancel,
+// backdrop tap, or Escape. Single-instance: a second call while one is open
+// resolves the previous Promise false (won't happen in today's flows, but
+// keeps the API safe).
+function showConfirm({ title, body = '', danger = false, confirmLabel = 'Confirm' } = {}) {
+  return new Promise(resolve => {
+    if (_confirmResolver) _confirmResolver(false);
+    _confirmResolver = resolve;
+
+    document.getElementById('confirm-title').textContent = title;
+
+    const bodyEl = document.getElementById('confirm-body');
+    if (body) {
+      bodyEl.textContent = body;
+      bodyEl.hidden = false;
+    } else {
+      bodyEl.hidden = true;
+    }
+
+    const sheet = document.getElementById('confirm-sheet');
+    sheet.classList.remove('is-input', 'is-danger');
+    sheet.classList.add(danger ? 'is-danger' : 'is-input');
+
+    document.getElementById('confirm-ok-btn').textContent = confirmLabel;
+    document.getElementById('confirm-modal').classList.add('open');
+
+    // Focus Cancel for destructive actions so a stray Enter doesn't confirm.
+    requestAnimationFrame(() => {
+      const focusTarget = danger
+        ? document.querySelector('#confirm-modal .btn-close-modal')
+        : document.getElementById('confirm-ok-btn');
+      if (focusTarget) focusTarget.focus();
+    });
+  });
+}
+
+function resolveConfirm(value) {
+  document.getElementById('confirm-modal').classList.remove('open');
+  if (_confirmResolver) {
+    _confirmResolver(value);
+    _confirmResolver = null;
+  }
+}
+
+function handleConfirmBackdropClick(e) {
+  if (e.target === document.getElementById('confirm-modal')) resolveConfirm(false);
+}
+
 // Build the Pair Waiting button label. Returns null when there's nothing to
 // pair (button gets hidden by the caller).
 function pairWaitingLabel(mode, uExp, uInexp) {
@@ -835,27 +888,36 @@ function renderPresetsList() {
     list.innerHTML = '<div class="preset-empty">No presets yet. Save the current roster below.</div>';
     return;
   }
-  list.innerHTML = presets.map(p => `
-    <div class="preset-row">
+  list.innerHTML = presets.map(p => {
+    const isEditing = (p.id === editingPresetId);
+    return `
+    <div class="preset-row${isEditing ? ' is-editing' : ''}">
       <div class="preset-info">
-        <span class="preset-name">${esc(p.name)}</span>
+        ${isEditing
+          ? `<input class="preset-name-input" type="text" maxlength="40"
+                data-id="${p.id}" value="${esc(p.name)}"
+                autocomplete="off" autocorrect="off" spellcheck="false"
+                onblur="commitPresetRename(${p.id}, this.value)"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">`
+          : `<span class="preset-name">${esc(p.name)}</span>`}
         <span class="preset-counts">${p.exp.length} exp &middot; ${p.inexp.length} inexp${(p.fixedPairs && p.fixedPairs.length) ? ` &middot; ${p.fixedPairs.length} set` : ''}</span>
       </div>
+      ${isEditing ? '' : `
       <div class="preset-actions">
         <button class="btn-preset-load"   onclick="loadPreset(${p.id})">Load</button>
         <button class="btn-preset-rename" onclick="renamePreset(${p.id})">Rename</button>
         <button class="btn-preset-delete" onclick="deletePreset(${p.id})">Delete</button>
-      </div>
-    </div>
-  `).join('');
+      </div>`}
+    </div>`;
+  }).join('');
 }
 
-function saveCurrentAsPreset() {
+async function saveCurrentAsPreset() {
   const input = document.getElementById('preset-save-name');
   const name  = input.value.trim();
   if (!name) return;
   if (!state.exp.length && !state.inexp.length && !state.fixedPairs.length) {
-    alert('Add some players to the roster first.');
+    showToast('Add some players first', { variant: 'error' });
     return;
   }
   const expNames   = state.exp.map(p => p.name);
@@ -863,7 +925,13 @@ function saveCurrentAsPreset() {
   const fixedSaved = state.fixedPairs.map(fp => ({ aName: fp.aName, bName: fp.bName }));
   const existing   = presets.find(p => p.name.toLowerCase() === name.toLowerCase());
   if (existing) {
-    if (!confirm(`Preset "${existing.name}" already exists. Overwrite it?`)) return;
+    const ok = await showConfirm({
+      title: 'Overwrite preset?',
+      body: `«${existing.name}» will be replaced with the current roster.`,
+      confirmLabel: 'Overwrite',
+      danger: true,
+    });
+    if (!ok) return;
     existing.name  = name;
     existing.exp   = expNames;
     existing.inexp = inexpNames;
@@ -876,11 +944,17 @@ function saveCurrentAsPreset() {
   renderPresetsList();
 }
 
-function loadPreset(id) {
+async function loadPreset(id) {
   const preset = presets.find(p => p.id === id);
   if (!preset) return;
   if (state.exp.length || state.inexp.length || state.fixedPairs.length) {
-    if (!confirm(`Replace the current roster with "${preset.name}"?`)) return;
+    const ok = await showConfirm({
+      title: 'Replace roster?',
+      body: 'Your current roster will be discarded.',
+      confirmLabel: 'Replace',
+      danger: true,
+    });
+    if (!ok) return;
   }
   state.exp        = preset.exp.map(n => ({ id: nextId(), name: n }));
   state.inexp      = preset.inexp.map(n => ({ id: nextId(), name: n }));
@@ -892,27 +966,57 @@ function loadPreset(id) {
   hidePresets();
 }
 
+// Flips the row into inline edit mode. Commit happens on Enter / blur via
+// commitPresetRename. No explicit Cancel - matches the player-rename pattern.
 function renamePreset(id) {
+  if (!presets.find(p => p.id === id)) return;
+  editingPresetId = id;
+  renderPresetsList();
+  requestAnimationFrame(() => {
+    const input = document.querySelector(`#preset-list .preset-name-input[data-id="${id}"]`);
+    if (input) { input.focus(); input.select(); }
+  });
+}
+
+function commitPresetRename(id, rawValue) {
   const preset = presets.find(p => p.id === id);
-  if (!preset) return;
-  const newName = prompt('Rename preset:', preset.name);
-  if (newName === null) return;
-  const trimmed = newName.trim();
-  if (!trimmed) return;
-  const clash = presets.find(p => p.id !== id && p.name.toLowerCase() === trimmed.toLowerCase());
-  if (clash) {
-    alert(`Another preset is already called "${clash.name}".`);
+  if (!preset) { editingPresetId = null; renderPresetsList(); return; }
+
+  const newName = rawValue.trim();
+  if (!newName || newName === preset.name) {
+    editingPresetId = null;
+    renderPresetsList();
     return;
   }
-  preset.name = trimmed;
+
+  const clash = presets.find(p => p.id !== id &&
+                                  p.name.toLowerCase() === newName.toLowerCase());
+  if (clash) {
+    showToast('Name already taken', { variant: 'error' });
+    // Stay in edit mode and refocus so the user can fix it without re-tapping Rename.
+    requestAnimationFrame(() => {
+      const input = document.querySelector(`#preset-list .preset-name-input[data-id="${id}"]`);
+      if (input) input.focus();
+    });
+    return;
+  }
+
+  preset.name = newName;
   savePresets();
+  editingPresetId = null;
   renderPresetsList();
 }
 
-function deletePreset(id) {
+async function deletePreset(id) {
   const preset = presets.find(p => p.id === id);
   if (!preset) return;
-  if (!confirm(`Delete preset "${preset.name}"?`)) return;
+  const ok = await showConfirm({
+    title: 'Delete preset?',
+    body: `«${preset.name}» will be removed permanently.`,
+    confirmLabel: 'Delete',
+    danger: true,
+  });
+  if (!ok) return;
   presets = presets.filter(p => p.id !== id);
   savePresets();
   renderPresetsList();
@@ -1014,6 +1118,15 @@ document.getElementById('exp-input-r').addEventListener('keydown', e => {
 });
 document.getElementById('inexp-input-r').addEventListener('keydown', e => {
   if (e.key === 'Enter') addPlayer('inexp', 'inexp-input-r');
+});
+
+// Escape cancels an open confirm sheet. Scoped to #confirm-modal so it
+// doesn't interfere with other modals or inputs.
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' &&
+      document.getElementById('confirm-modal').classList.contains('open')) {
+    resolveConfirm(false);
+  }
 });
 
 // Feature-detect Web Share. Button is hidden in HTML by default; reveal it
