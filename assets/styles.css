@@ -507,25 +507,25 @@ input[type="text"]::placeholder { color: var(--muted); }
    filled in the card's own background color. */
 .team-num {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 2.4rem;
+  font-size: 1.5rem;
   font-weight: 800;
   color: var(--dim);
-  min-width: 50px;
+  min-width: 34px;
   letter-spacing: -0.02em;
   line-height: 1;
   align-self: center;
   position: relative;
-  transform: skewX(-10deg);
+  transform: skewX(-6deg);
   transform-origin: center;
 }
 
 .team-num::after {
   content: '';
   position: absolute;
-  left: -4px;
-  right: -4px;
-  top: calc(50% - 1.5px);
-  height: 3px;
+  left: -3px;
+  right: -3px;
+  top: calc(50% - 0.75px);
+  height: 1.5px;
   background: var(--surface);
   pointer-events: none;
 }
@@ -544,11 +544,11 @@ input[type="text"]::placeholder { color: var(--muted); }
   border: none;
   border-bottom: 1px dashed var(--border);
   border-radius: 0;
-  padding: 0 0 5px 0;
-  margin-bottom: 6px;
+  padding: 0 0 8px 0;
+  margin-bottom: 8px;
   color: var(--text);
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 16px; /* prevents iOS auto-zoom on focus */
+  font-size: 1.05rem; /* >=16px so iOS does not auto-zoom; up from 16px flat */
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
