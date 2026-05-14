@@ -792,6 +792,27 @@ input[type="text"]::placeholder { color: var(--muted); }
   border: 1px solid #12483a;
 }
 
+/* Inline hint that appears under an unpaired bucket when the pairing leaves
+   a strand the user can't resolve in the current mode. Muted info tone
+   (dim text + small info-circle icon) - explains WHY those players are
+   still sitting in the bucket, doesn't shout. */
+.unpaired-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  color: var(--dim);
+}
+
+.unpaired-hint .hint-icon {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+}
+
 .btn-back {
   width: 100%;
   margin-top: 20px;

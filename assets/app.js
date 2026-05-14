@@ -540,6 +540,55 @@ function selectMode(mode) {
   hideMenu();
 }
 
+// Inline info-circle icon used in the leftover hints under each unpaired bucket.
+const HINT_ICON_HTML = `
+  <svg class="hint-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+    <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <rect x="7.25" y="6.5" width="1.5" height="5" rx="0.5"/>
+    <circle cx="8" cy="4.5" r="0.85"/>
+  </svg>`;
+
+// Build the Pair Waiting button label. Returns null when there's nothing to
+// pair (button gets hidden by the caller).
+function pairWaitingLabel(mode, uExp, uInexp) {
+  const teamWord = n => n === 1 ? 'team' : 'teams';
+  if (mode === 'split') {
+    const expPairs   = Math.floor(uExp / 2);
+    const inexpPairs = Math.floor(uInexp / 2);
+    const totalPairs = expPairs + inexpPairs;
+    if (totalPairs === 0) return null;
+    if (expPairs > 0 && inexpPairs > 0) {
+      const players = (expPairs + inexpPairs) * 2;
+      return `Pair ${players} players (${totalPairs} teams: ${expPairs} exp + ${inexpPairs} inexp)`;
+    }
+    if (expPairs > 0) {
+      return `Pair ${expPairs * 2} experienced (${expPairs} ${teamWord(expPairs)})`;
+    }
+    return `Pair ${inexpPairs * 2} inexperienced (${inexpPairs} ${teamWord(inexpPairs)})`;
+  }
+  const pairs = Math.min(uExp, uInexp);
+  if (pairs === 0) return null;
+  return `Pair ${pairs * 2} players (${pairs} ${teamWord(pairs)})`;
+}
+
+// Build the per-bucket leftover hint text. Returns null when no strand exists
+// for the given category in the current mode.
+function leftoverHintText(mode, uExp, uInexp, category) {
+  let strand, needCategory;
+  if (mode === 'split') {
+    strand = (category === 'exp' ? uExp : uInexp) % 2;
+    needCategory = category;                  // same category fills the leftover
+  } else {
+    const pairs = Math.min(uExp, uInexp);
+    strand = (category === 'exp' ? uExp : uInexp) - pairs;
+    needCategory = category === 'exp' ? 'inexp' : 'exp';
+  }
+  if (strand <= 0) return null;
+  const needName = needCategory === 'exp' ? 'experienced' : 'inexperienced';
+  const subject  = strand === 1 ? 'this 1' : `these ${strand}`;
+  return `Need ${strand} more ${needName} to pair ${subject}`;
+}
+
 function renderResults() {
   const results = document.getElementById('results');
   if (!state.hasPaired) { results.classList.remove('show'); return; }
@@ -662,15 +711,23 @@ function renderResults() {
     uInexpBlock.style.display = 'none';
   }
 
-  const pairBtn = document.getElementById('btn-pair-unpaired');
-  let pairCount;
-  if (state.mode === 'split') {
-    pairCount = Math.floor(uExp.length / 2) + Math.floor(uInexp.length / 2);
-  } else {
-    pairCount = Math.min(uExp.length, uInexp.length);
-  }
-  pairBtn.style.display = pairCount > 0 ? 'block' : 'none';
-  pairBtn.textContent   = `Pair ${pairCount} Waiting`;
+  const pairBtn  = document.getElementById('btn-pair-unpaired');
+  const btnLabel = pairWaitingLabel(state.mode, uExp.length, uInexp.length);
+  pairBtn.style.display = btnLabel === null ? 'none' : 'block';
+  if (btnLabel !== null) pairBtn.textContent = btnLabel;
+
+  // Per-bucket leftover hints. Each bucket's hint hides naturally with the
+  // parent .unpaired-block when the bucket is empty (display:none cascades).
+  ['exp', 'inexp'].forEach(cat => {
+    const hintEl = document.getElementById(`unpaired-${cat}-hint`);
+    const text   = leftoverHintText(state.mode, uExp.length, uInexp.length, cat);
+    if (text === null) {
+      hintEl.hidden = true;
+      return;
+    }
+    hintEl.hidden = false;
+    hintEl.innerHTML = `${HINT_ICON_HTML}<span>${esc(text)}</span>`;
+  });
 }
 
 // ---- Challonge export ----
