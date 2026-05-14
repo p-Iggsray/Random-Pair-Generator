@@ -69,8 +69,9 @@ let swapSelection = null;
 async function saveState() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    flashDot();
-  } catch(e) {}
+  } catch(e) {
+    showToast('Save failed', { variant: 'error' });
+  }
 }
 
 async function loadState() {
@@ -95,8 +96,9 @@ async function loadState() {
 function savePresets() {
   try {
     localStorage.setItem(PRESETS_KEY, JSON.stringify(presets));
-    flashDot();
-  } catch(e) {}
+  } catch(e) {
+    showToast('Save failed', { variant: 'error' });
+  }
 }
 
 function loadPresetsFromStorage() {
@@ -104,13 +106,6 @@ function loadPresetsFromStorage() {
     const raw = localStorage.getItem(PRESETS_KEY);
     if (raw) presets = JSON.parse(raw);
   } catch(e) {}
-}
-
-function flashDot() {
-  const dot = document.getElementById('save-dot');
-  dot.classList.add('flash');
-  clearTimeout(dot._t);
-  dot._t = setTimeout(() => dot.classList.remove('flash'), 900);
 }
 
 // ---- helpers ----
