@@ -8,4 +8,12 @@
   --muted:   #3a3f52;
   --text:    #dce3f0;
   --dim:     #5a6178;
+
+  /* Accent gradients + matching borders, used by primary buttons inside
+     modal-sheet variants. Extracted verbatim from the original .btn-bulk-add
+     and .btn-copy rules so existing buttons render identically. */
+  --exp-grad:     linear-gradient(120deg, #1a2e5c 0%, #1e1040 100%);
+  --exp-border:   #2a4080;
+  --inexp-grad:   linear-gradient(120deg, #1a3a20 0%, #112a1a 100%);
+  --inexp-border: #1e4a28;
 }
