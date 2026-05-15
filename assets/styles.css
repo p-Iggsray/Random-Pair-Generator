@@ -767,30 +767,34 @@ input[type="text"]::placeholder { color: var(--muted); }
 .unpaired-label.inexp { color: var(--inexp); }
 
 .unpaired-tag {
-  display: inline-block;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.88rem;
-  padding: 7px 12px;
-  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  background: var(--bg);
+  border-radius: 5px;
+  padding: 6px 10px 6px 12px;
   margin: 0 5px 5px 0;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  vertical-align: top;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  font-weight: 500;
+  min-height: 30px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
 }
 
-.unpaired-tag.exp {
-  background: #0d1e35;
-  color: var(--exp);
-  border: 1px solid #1a3a6a;
+.unpaired-tag::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background: var(--bar-color, var(--border));
 }
 
-.unpaired-tag.inexp {
-  background: #0a2420;
-  color: var(--inexp);
-  border: 1px solid #12483a;
-}
+.unpaired-tag.exp   { --bar-color: var(--exp);   color: var(--text); }
+.unpaired-tag.inexp { --bar-color: var(--inexp); color: var(--text); }
 
 /* Inline hint that appears under an unpaired bucket when the pairing leaves
    a strand the user can't resolve in the current mode. Muted info tone
