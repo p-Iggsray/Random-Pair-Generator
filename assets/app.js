@@ -396,6 +396,12 @@ function fireConfetti() {
   setTimeout(() => container.remove(), 2500);
 }
 
+// Confetti is z-index 50, modals 100 — but the 70% backdrop leaves the
+// dimmed pieces visible drifting behind the sheet. Strip on modal open.
+function closeAmbientAnimations() {
+  document.querySelectorAll('.confetti-burst').forEach(el => el.remove());
+}
+
 // Two-tap reset. First tap arms the button (red styling + "Tap again to confirm").
 // A second tap within 3s clears pairings and team names. Players stay in their lists.
 let resetArmTimer = null;
@@ -412,6 +418,7 @@ function disarmReset() {
 function resetTeams() {
   const btn = document.getElementById('btn-back');
   if (btn.classList.contains('armed')) {
+    closeAmbientAnimations();
     disarmReset();
     swapSelection  = null;
     state.pairs     = [];
@@ -521,6 +528,7 @@ function renderMenu() {
 
 function openMenu() {
   if (state.hasPaired) return; // safety: menu-btn is hidden in this state anyway
+  closeAmbientAnimations();
   renderMenu();
   document.getElementById('menu-modal').classList.add('open');
 }
@@ -541,6 +549,7 @@ function selectMode(mode) {
 }
 
 function openAbout() {
+  closeAmbientAnimations();
   hideMenu();
   document.getElementById('about-version').textContent = APP_VERSION;
   document.getElementById('about-modal').classList.add('open');
@@ -555,6 +564,7 @@ function handleAboutBackdropClick(e) {
 }
 
 function openHowToPlay() {
+  closeAmbientAnimations();
   hideMenu();
   document.getElementById('how-to-play-modal').classList.add('open');
 }
@@ -649,6 +659,7 @@ let _confirmResolver = null;
 // resolves the previous Promise false (won't happen in today's flows, but
 // keeps the API safe).
 function showConfirm({ title, body = '', danger = false, confirmLabel = 'Confirm' } = {}) {
+  closeAmbientAnimations();
   return new Promise(resolve => {
     if (_confirmResolver) _confirmResolver(false);
     _confirmResolver = resolve;
@@ -909,6 +920,7 @@ function buildExportText() {
 // ---- roster presets ----
 
 function openPresets() {
+  closeAmbientAnimations();
   document.getElementById('preset-save-name').value = '';
   renderPresetsList();
   document.getElementById('presets-modal').classList.add('open');
@@ -1063,6 +1075,7 @@ async function deletePreset(id) {
 }
 
 function openBulkAdd(type) {
+  closeAmbientAnimations();
   const modal = document.getElementById('bulk-modal');
   modal.dataset.type = type;
   document.getElementById('bulk-title').textContent =
@@ -1107,6 +1120,7 @@ function addBulkPlayers() {
 }
 
 function showExport() {
+  closeAmbientAnimations();
   document.getElementById('export-text').value = buildExportText();
   document.getElementById('export-modal').classList.add('open');
 }
