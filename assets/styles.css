@@ -647,6 +647,12 @@ input[type="text"]::placeholder { color: var(--muted); }
 
 .team-member:active { background: rgba(255, 255, 255, 0.04); }
 
+.team-member:focus-visible {
+  outline: 2px solid var(--exp);
+  outline-offset: 2px;
+}
+.team-member.inexp:focus-visible { outline-color: var(--inexp); }
+
 /* Selected swap player breathes so it is obviously the "active" pick. Pulse
    matches the 1.8s rhythm used by the Generate button and the team-name
    underline pulse - one design language across the app. Background alpha

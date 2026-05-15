@@ -522,8 +522,12 @@ function renderMenu() {
   const fullBtn  = document.getElementById('menu-mode-full');
   const splitBtn = document.getElementById('menu-mode-split');
   if (!fullBtn || !splitBtn) return;
-  fullBtn.classList.toggle('active',  state.mode === 'full');
-  splitBtn.classList.toggle('active', state.mode === 'split');
+  const isFull  = state.mode === 'full';
+  const isSplit = state.mode === 'split';
+  fullBtn.classList.toggle('active',  isFull);
+  splitBtn.classList.toggle('active', isSplit);
+  fullBtn.setAttribute('aria-checked',  isFull  ? 'true' : 'false');
+  splitBtn.setAttribute('aria-checked', isSplit ? 'true' : 'false');
 }
 
 function openMenu() {
@@ -768,6 +772,7 @@ function renderResults() {
             type="text"
             maxlength="40"
             placeholder="Team ${num} (tap to name)"
+            aria-label="Team ${num} name"
             value="${nm}"
             autocomplete="off"
             autocorrect="off"
@@ -814,17 +819,22 @@ function renderResults() {
             type="text"
             maxlength="40"
             placeholder="Team ${num} (tap to name)"
+            aria-label="Team ${num} name"
             value="${nm}"
             autocomplete="off"
             autocorrect="off"
             spellcheck="false"
             onchange="setTeamName(${i}, this.value)">
-          <div class="team-member ${aClass}${aSel}" onclick="selectForSwap('${aClass}', ${i}, ${aPlayer.id})">
+          <div class="team-member ${aClass}${aSel}" tabindex="0" role="button"
+               onclick="selectForSwap('${aClass}', ${i}, ${aPlayer.id})"
+               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
             <span class="member-dot ${aClass}"></span>
             <span class="member-name ${aClass}">${esc(aPlayer.name)}</span>
           </div>
           <hr class="team-hr">
-          <div class="team-member ${bClass}${bSel}" onclick="selectForSwap('${bClass}', ${i}, ${bPlayer.id})">
+          <div class="team-member ${bClass}${bSel}" tabindex="0" role="button"
+               onclick="selectForSwap('${bClass}', ${i}, ${bPlayer.id})"
+               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
             <span class="member-dot ${bClass}"></span>
             <span class="member-name ${bClass}">${esc(bPlayer.name)}</span>
           </div>

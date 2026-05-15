@@ -18,7 +18,7 @@
   <link rel="manifest" href="manifest.webmanifest?v=4">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/theme.css?v=37">
-  <link rel="stylesheet" href="assets/styles.css?v=44">
+  <link rel="stylesheet" href="assets/styles.css?v=45">
   <script>
     // Show the splash at most once per browsing session. A service-worker
     // update-then-reload would otherwise replay the splash a second time
@@ -137,7 +137,7 @@
       <input type="text" id="exp-input" placeholder="Name" maxlength="40" autocomplete="off" autocorrect="off">
       <button class="btn-add" aria-label="Add experienced" onclick="addPlayer('exp')">+</button>
     </div>
-    <div class="name-list" id="exp-list">
+    <div class="name-list" id="exp-list" aria-live="polite" aria-atomic="false">
       <div class="list-empty">Empty</div>
     </div>
   </div>
@@ -160,7 +160,7 @@
       <input type="text" id="inexp-input" placeholder="Name" maxlength="40" autocomplete="off" autocorrect="off">
       <button class="btn-add" aria-label="Add inexperienced" onclick="addPlayer('inexp')">+</button>
     </div>
-    <div class="name-list" id="inexp-list">
+    <div class="name-list" id="inexp-list" aria-live="polite" aria-atomic="false">
       <div class="list-empty">Empty</div>
     </div>
   </div>
@@ -191,7 +191,7 @@
              onkeydown="if(event.key==='Enter'){event.preventDefault();addFixedPair();}">
       <button class="btn-add set" aria-label="Add set pair" onclick="addFixedPair()">+</button>
     </div>
-    <div class="name-list" id="fixed-list">
+    <div class="name-list" id="fixed-list" aria-live="polite" aria-atomic="false">
       <div class="list-empty">Empty</div>
     </div>
   </div>
@@ -245,25 +245,25 @@
     <div class="modal-header">
       <span class="modal-title">Menu</span>
     </div>
-    <div class="menu-options">
-      <button class="menu-option" id="menu-mode-full" onclick="selectMode('full')">
+    <div class="menu-options" role="menu">
+      <button class="menu-option" id="menu-mode-full" role="menuitemradio" aria-checked="false" onclick="selectMode('full')">
         <span class="menu-option-title">Full 2v2</span>
         <span class="menu-option-desc">Experienced &amp; inexperienced pair across categories</span>
       </button>
-      <button class="menu-option" id="menu-mode-split" onclick="selectMode('split')">
+      <button class="menu-option" id="menu-mode-split" role="menuitemradio" aria-checked="false" onclick="selectMode('split')">
         <span class="menu-option-title">Split 2v2</span>
         <span class="menu-option-desc">Same-skill teams: exp + exp and inexp + inexp</span>
       </button>
-      <button class="menu-option" id="menu-about" onclick="openAbout()">
+      <button class="menu-option" id="menu-about" role="menuitem" onclick="openAbout()">
         <span class="menu-option-title">About</span>
         <span class="menu-option-desc">Version, links, credits</span>
       </button>
-      <button class="menu-option" id="menu-how-to-play" onclick="openHowToPlay()">
+      <button class="menu-option" id="menu-how-to-play" role="menuitem" onclick="openHowToPlay()">
         <span class="menu-option-title">How to play</span>
         <span class="menu-option-desc">Quick onboarding</span>
       </button>
       <hr class="menu-divider">
-      <button class="menu-option destructive" id="menu-reset" onclick="confirmResetAll()">
+      <button class="menu-option destructive" id="menu-reset" role="menuitem" onclick="confirmResetAll()">
         <span class="menu-option-title">Reset all data</span>
         <span class="menu-option-desc">Wipe roster, presets, state</span>
       </button>
@@ -396,7 +396,7 @@
   <span class="toast-text" id="toast-text"></span>
 </div>
 
-<script src="assets/app.js?v=41"></script>
+<script src="assets/app.js?v=42"></script>
 
 </body>
 </html>
