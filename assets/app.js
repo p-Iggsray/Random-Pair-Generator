@@ -1,7 +1,7 @@
 // Capture the splash boot time as early as possible so we can honor a
 // minimum visible duration regardless of how fast state loads.
 const splashStartTime = Date.now();
-const SPLASH_MIN_MS   = 4000; // ~4s "boot screen" feel
+const SPLASH_MIN_MS   = 2000; // boot-screen beat; iOS launch icon already shows for ~1s
 const SPLASH_FADE_MS  = 500;
 
 const APP_VERSION = '0.1.0';
