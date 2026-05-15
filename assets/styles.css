@@ -495,7 +495,7 @@ input[type="text"]::placeholder { color: var(--muted); }
 .btn-generate.active:active {
   animation: none;
   opacity: 0.88;
-  transform: scale(0.985);
+  transform: scale(0.985) skewX(-6deg);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1563,4 +1563,28 @@ input[type="text"]::placeholder { color: var(--muted); }
 
 @media (prefers-reduced-motion: reduce) {
   .splash-kirby { animation: none; }
+}
+
+/* Smash slant — every Barlow Condensed uppercase element gets the -6deg
+   functional-tier skew. Brand-tier titles (header h1, splash-title) keep
+   their -10deg at their own definition sites. The functional-tier
+   elements that already had -6deg (panel-label, section-label, team-num,
+   unpaired-label, modal-title) are likewise declared in place. Toasts
+   are intentionally excluded — functional feedback, not chrome. */
+.btn-generate,
+.btn-back,
+.btn-bulk-add,
+.btn-challonge,
+.btn-close-modal,
+.btn-confirm-ok,
+.btn-copy,
+.btn-pair-unpaired,
+.btn-presets,
+.btn-preset-save,
+.btn-share,
+.info-title,
+.menu-option-title,
+.preset-actions button,
+.team-name-input {
+  transform: skewX(-6deg);
 }
