@@ -946,7 +946,8 @@ input[type="text"]::placeholder { color: var(--muted); }
    is-list resolve to the same colors today but stay semantically distinct so
    future styling can diverge without renaming HTML. */
 .modal-sheet.is-input,
-.modal-sheet.is-list {
+.modal-sheet.is-list,
+.modal-sheet.is-info {
   --modal-accent:        var(--exp);
   --modal-accent-grad:   var(--exp-grad);
   --modal-accent-border: var(--exp-border);
@@ -1109,6 +1110,51 @@ input[type="text"]::placeholder { color: var(--muted); }
   color: var(--dim);
   line-height: 1.4;
 }
+
+.menu-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 4px 0;
+  width: 100%;
+}
+
+.menu-option.destructive .menu-option-title { color: var(--danger); }
+.menu-option.destructive:active {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: var(--danger);
+}
+
+.info-body {
+  padding: 0 4px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+.info-body p { margin: 0 0 10px; }
+.info-body p:last-child { margin-bottom: 0; }
+.info-body a {
+  color: var(--modal-accent);
+  text-decoration: underline;
+  word-break: break-all;
+}
+.info-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.info-meta { color: var(--dim); font-size: 0.78rem; }
+.info-footnote { color: var(--dim); font-size: 0.78rem; }
+.info-bullets {
+  padding-left: 20px;
+  margin: 0;
+}
+.info-bullets li { margin-bottom: 10px; }
+.info-bullets li:last-child { margin-bottom: 0; }
+.info-bullets strong { color: var(--text); font-weight: 700; }
 
 .btn-presets {
   display: inline-flex;

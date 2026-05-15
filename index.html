@@ -18,7 +18,7 @@
   <link rel="manifest" href="manifest.webmanifest?v=4">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/theme.css?v=37">
-  <link rel="stylesheet" href="assets/styles.css?v=39">
+  <link rel="stylesheet" href="assets/styles.css?v=40">
   <script>
     // Show the splash at most once per browsing session. A service-worker
     // update-then-reload would otherwise replay the splash a second time
@@ -243,7 +243,7 @@
   <div class="modal-sheet is-list">
     <div class="modal-handle"></div>
     <div class="modal-header">
-      <span class="modal-title">Pairing Mode</span>
+      <span class="modal-title">Menu</span>
     </div>
     <div class="menu-options">
       <button class="menu-option" id="menu-mode-full" onclick="selectMode('full')">
@@ -253,6 +253,19 @@
       <button class="menu-option" id="menu-mode-split" onclick="selectMode('split')">
         <span class="menu-option-title">Split 2v2</span>
         <span class="menu-option-desc">Same-skill teams: exp + exp and inexp + inexp</span>
+      </button>
+      <button class="menu-option" id="menu-about" onclick="openAbout()">
+        <span class="menu-option-title">About</span>
+        <span class="menu-option-desc">Version, links, credits</span>
+      </button>
+      <button class="menu-option" id="menu-how-to-play" onclick="openHowToPlay()">
+        <span class="menu-option-title">How to play</span>
+        <span class="menu-option-desc">Quick onboarding</span>
+      </button>
+      <hr class="menu-divider">
+      <button class="menu-option destructive" id="menu-reset" onclick="confirmResetAll()">
+        <span class="menu-option-title">Reset all data</span>
+        <span class="menu-option-desc">Wipe roster, presets, state</span>
       </button>
     </div>
     <div class="modal-actions">
@@ -332,13 +345,58 @@
   </div>
 </div>
 
+<!-- About modal -->
+
+<div class="modal-backdrop" id="about-modal" onclick="handleAboutBackdropClick(event)">
+  <div class="modal-sheet is-info">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">About</span>
+    </div>
+    <div class="info-body">
+      <p class="info-title">Smash Pairing</p>
+      <p class="info-meta">Version <span id="about-version">0.1.0</span></p>
+      <p><a href="https://github.com/p-Iggsray/Smash-Pairing" target="_blank" rel="noopener">github.com/p-Iggsray/Smash-Pairing</a></p>
+      <p>Made by p-Iggsray</p>
+      <p class="info-footnote">Local-first PWA. No tracking.</p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-close-modal" onclick="hideAbout()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- How to play modal -->
+
+<div class="modal-backdrop" id="how-to-play-modal" onclick="handleHowToPlayBackdropClick(event)">
+  <div class="modal-sheet is-info">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">How to play</span>
+    </div>
+    <div class="info-body">
+      <ul class="info-bullets">
+        <li>Add player names to <strong>Experienced</strong> (orange) or <strong>Inexperienced</strong> (blue) columns.</li>
+        <li>Pick a mode from the menu — <strong>Full 2v2</strong> balances skill across teams, <strong>Split 2v2</strong> keeps skill levels apart.</li>
+        <li>Tap <strong>Generate</strong> to create pairings.</li>
+        <li>Tap a team name to rename it; tap a player to swap with someone on the bench.</li>
+        <li>Use <strong>Pair Waiting</strong> to match up players sitting out the round.</li>
+        <li><strong>Reset Teams</strong> clears just the current pairings — your roster and presets stay.</li>
+      </ul>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-close-modal" onclick="hideHowToPlay()">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast (single shared element; lives outside the modal so it survives hide) -->
 <div id="toast" class="toast" role="status" aria-live="polite" hidden onclick="hideToast()">
   <span class="toast-icon" id="toast-icon" aria-hidden="true"></span>
   <span class="toast-text" id="toast-text"></span>
 </div>
 
-<script src="assets/app.js?v=38"></script>
+<script src="assets/app.js?v=39"></script>
 
 </body>
 </html>
