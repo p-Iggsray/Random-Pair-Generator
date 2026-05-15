@@ -325,8 +325,8 @@ input[type="text"]::placeholder { color: var(--muted); }
 }
 
 .results-add {
-  margin-top: 18px;
-  margin-bottom: 4px;
+  margin-top: 0;
+  margin-bottom: 18px;
 }
 
 .results-add .section-label {

@@ -18,7 +18,7 @@
   <link rel="manifest" href="manifest.webmanifest?v=4">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/theme.css?v=37">
-  <link rel="stylesheet" href="assets/styles.css?v=41">
+  <link rel="stylesheet" href="assets/styles.css?v=42">
   <script>
     // Show the splash at most once per browsing session. A service-worker
     // update-then-reload would otherwise replay the splash a second time
@@ -202,6 +202,18 @@
 </div>
 
 <div id="results">
+<div class="results-add">
+  <div class="section-label">Add Player</div>
+  <div class="input-row exp">
+    <input type="text" id="exp-input-r" placeholder="Experienced name" maxlength="40" autocomplete="off" autocorrect="off">
+    <button class="btn-add exp" aria-label="Add experienced" onclick="addPlayer('exp', 'exp-input-r')">+</button>
+  </div>
+  <div class="input-row inexp">
+    <input type="text" id="inexp-input-r" placeholder="Inexperienced name" maxlength="40" autocomplete="off" autocorrect="off">
+    <button class="btn-add inexp" aria-label="Add inexperienced" onclick="addPlayer('inexp', 'inexp-input-r')">+</button>
+  </div>
+</div>
+
   <div class="section-label">Teams</div>
   <div class="swap-hint" id="swap-hint"></div>
   <div id="pairs-list"></div>
@@ -217,18 +229,6 @@
     <div id="unpaired-inexp-tags"></div>
     <div class="unpaired-hint" id="unpaired-inexp-hint" hidden></div>
   </div>
-
-<div class="results-add">
-  <div class="section-label">Add Player</div>
-  <div class="input-row exp">
-    <input type="text" id="exp-input-r" placeholder="Experienced name" maxlength="40" autocomplete="off" autocorrect="off">
-    <button class="btn-add exp" aria-label="Add experienced" onclick="addPlayer('exp', 'exp-input-r')">+</button>
-  </div>
-  <div class="input-row inexp">
-    <input type="text" id="inexp-input-r" placeholder="Inexperienced name" maxlength="40" autocomplete="off" autocorrect="off">
-    <button class="btn-add inexp" aria-label="Add inexperienced" onclick="addPlayer('inexp', 'inexp-input-r')">+</button>
-  </div>
-</div>
 
 <button class="btn-pair-unpaired" id="btn-pair-unpaired" onclick="pairUnpaired()" style="display:none;">Pair Waiting</button>
 
