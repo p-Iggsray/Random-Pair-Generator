@@ -528,17 +528,61 @@ function renderMenu() {
   splitBtn.classList.toggle('active', isSplit);
   fullBtn.setAttribute('aria-checked',  isFull  ? 'true' : 'false');
   splitBtn.setAttribute('aria-checked', isSplit ? 'true' : 'false');
+  const desc = document.getElementById('menu-team-creation-desc');
+  if (desc) {
+    desc.textContent = isFull  ? 'Currently: Full 2v2'
+                     : isSplit ? 'Currently: Split 2v2'
+                               : 'Choose a pairing mode';
+  }
 }
+
+let currentMenuView = 'main';
 
 function openMenu() {
   if (state.hasPaired) return; // safety: menu-btn is hidden in this state anyway
   closeAmbientAnimations();
+  const sheet = document.querySelector('#menu-modal .modal-sheet.is-drawer');
+  if (sheet) {
+    sheet.dataset.view = 'main';
+    sheet.dataset.navDirection = 'forward';
+  }
+  currentMenuView = 'main';
   renderMenu();
   document.getElementById('menu-modal').classList.add('open');
+  triggerEnterAnimation('main');
 }
 
 function hideMenu() {
   document.getElementById('menu-modal').classList.remove('open');
+}
+
+function openSubView(name) {
+  const sheet = document.querySelector('#menu-modal .modal-sheet.is-drawer');
+  if (!sheet) return;
+  currentMenuView = name;
+  sheet.dataset.navDirection = 'forward';
+  sheet.dataset.view = name;
+  triggerEnterAnimation(name);
+}
+
+function goBackToMain() {
+  const sheet = document.querySelector('#menu-modal .modal-sheet.is-drawer');
+  if (!sheet) return;
+  currentMenuView = 'main';
+  sheet.dataset.navDirection = 'back';
+  sheet.dataset.view = 'main';
+  triggerEnterAnimation('main');
+}
+
+// Force the stagger animation to replay on a view becoming active. CSS
+// animations only fire when an element starts matching the selector, so
+// repeated entries need the class remove → reflow → re-add pattern.
+function triggerEnterAnimation(name) {
+  const view = document.querySelector(`#menu-modal .drawer-view-${name}`);
+  if (!view) return;
+  view.classList.remove('is-entering');
+  void view.offsetWidth;
+  view.classList.add('is-entering');
 }
 
 // Hamburger button calls this so the morphed × can also close the drawer.
