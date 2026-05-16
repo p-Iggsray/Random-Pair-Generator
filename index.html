@@ -18,7 +18,7 @@
   <link rel="manifest" href="manifest.webmanifest?v=4">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/theme.css?v=37">
-  <link rel="stylesheet" href="assets/styles.css?v=45">
+  <link rel="stylesheet" href="assets/styles.css?v=46">
   <script>
     // Show the splash at most once per browsing session. A service-worker
     // update-then-reload would otherwise replay the splash a second time
@@ -94,7 +94,7 @@
 </div>
 
 
-<button id="menu-btn" class="menu-btn" aria-label="Open menu" onclick="openMenu()">
+<button id="menu-btn" class="menu-btn" aria-label="Open menu" onclick="toggleMenu()">
   <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
     <line x1="4" y1="7"  x2="20" y2="7"/>
     <line x1="4" y1="12" x2="20" y2="12"/>
@@ -240,7 +240,7 @@
 <!-- Menu (pairing mode) modal -->
 
 <div class="modal-backdrop" id="menu-modal" onclick="handleMenuBackdropClick(event)">
-  <div class="modal-sheet is-list">
+  <div class="modal-sheet is-list is-drawer">
     <div class="modal-handle"></div>
     <div class="modal-header">
       <span class="modal-title">Menu</span>
@@ -396,7 +396,7 @@
   <span class="toast-text" id="toast-text"></span>
 </div>
 
-<script src="assets/app.js?v=42"></script>
+<script src="assets/app.js?v=43"></script>
 
 </body>
 </html>
