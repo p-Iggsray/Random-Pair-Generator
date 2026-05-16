@@ -541,6 +541,15 @@ function hideMenu() {
   document.getElementById('menu-modal').classList.remove('open');
 }
 
+// Hamburger button calls this so the morphed × can also close the drawer.
+function toggleMenu() {
+  if (document.getElementById('menu-modal').classList.contains('open')) {
+    hideMenu();
+  } else {
+    openMenu();
+  }
+}
+
 function handleMenuBackdropClick(e) {
   if (e.target === document.getElementById('menu-modal')) hideMenu();
 }
@@ -1199,6 +1208,53 @@ document.addEventListener('keydown', e => {
 if ('share' in navigator) {
   document.getElementById('btn-share').hidden = false;
 }
+
+// Drawer swipe-to-dismiss. 8px + axis check gates drag detection so taps on
+// .menu-option still register and vertical scroll passes to native.
+(function initDrawerSwipe() {
+  const sheet = document.querySelector('#menu-modal .modal-sheet.is-drawer');
+  if (!sheet) return;
+
+  let startX = 0, startY = 0, dx = 0;
+  let dragging = false;
+
+  sheet.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    startX = t.clientX;
+    startY = t.clientY;
+    dx = 0;
+    dragging = false;
+  }, { passive: true });
+
+  sheet.addEventListener('touchmove', e => {
+    const t = e.touches[0];
+    dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+
+    if (!dragging) {
+      if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) {
+        dragging = true;
+        sheet.classList.add('is-dragging');
+      } else {
+        return;
+      }
+    }
+    e.preventDefault();
+    if (dx > 0) dx = 0; // no rightward drag past resting
+    sheet.style.transform = `translateX(${dx}px)`;
+  }, { passive: false });
+
+  sheet.addEventListener('touchend', () => {
+    if (!dragging) return;
+    const threshold = sheet.offsetWidth * 0.35;
+    // Order: re-enable transition, then change .open, then clear inline.
+    // Otherwise the value change snaps with no animation, or settles to
+    // translateX(0) before .open removes and animates to -100%.
+    sheet.classList.remove('is-dragging');
+    if (Math.abs(dx) > threshold) hideMenu();
+    sheet.style.transform = '';
+  });
+})();
 
 (async () => {
   await loadState();
